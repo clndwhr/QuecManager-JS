@@ -169,7 +169,7 @@ const useHomeData = () => {
           trackingAreaCode: extractValueByNetworkType(rawData[10]?.response, getNetworkType(rawData[13]?.response), { "NR5G-SA": 1, "NR5G-NSA": 2, "LTE": 1 }, { "NR5G-SA": 8, "NR5G-NSA": 10, "LTE": 12 }, false),
           cellIdRaw: extractValueByNetworkType(rawData[10]?.response, getNetworkType(rawData[13]?.response), { "NR5G-SA": 1, "NR5G-NSA": 2, "LTE": 1 }, { "NR5G-SA": 6, "NR5G-NSA": 4, "LTE": 6 }, true), 
           trackingAreaCodeRaw: extractValueByNetworkType(rawData[10]?.response, getNetworkType(rawData[13]?.response), { "NR5G-SA": 1, "NR5G-NSA": 2, "LTE": 1 }, { "NR5G-SA": 8, "NR5G-NSA": 10, "LTE": 12 }, true),
-          physicalCellId: getCurrentBandsPCI(rawData[13].response, getNetworkType(rawData[13].response)).join(", ") || "Unknown",
+          physicalCellId: getCurrentBands(rawData[13].response, { 8:4, 12:5, 13:5, 10:5 }).join(", ") || "Unknown",
           earfcn: getCurrentBandsEARFCN(rawData[13].response).join(", "),
           mcc: getNetworkCode(rawData[10]?.response, getNetworkType(rawData[13]?.response), { "NR5G-NSA": 2, "LTE": 4, "NR5G-SA": 4 }),
           mnc: getNetworkCode(rawData[10]?.response, getNetworkType(rawData[13]?.response), { "NR5G-NSA": 3, "LTE": 5, "NR5G-SA": 5 }),
@@ -181,10 +181,10 @@ const useHomeData = () => {
           bandNumber: getCurrentBandsBandNumber(rawData[13].response) || ["Unknown",],
           earfcn: getCurrentBandsEARFCN(rawData[13].response),
           bandwidth: getCurrentBandsBandwidth(rawData[13].response) || ["Unknown",],
-          pci: getCurrentBandsPCI(rawData[13].response, getNetworkType(rawData[13].response)) || ["Unknown"],
-          rsrp: getCurrentBandsRSRP(rawData[13].response),
-          rsrq: getCurrentBandsRSRQ(rawData[13].response) || ["Unknown"],
-          sinr: getCurrentBandsSINR(rawData[13].response, getNetworkType(rawData[13].response)) || ["Unknown"],
+          pci: getCurrentBands(rawData[13].response, { 8:4, 12:5, 13:5, 10:5 }),
+          rsrp: getCurrentBands(rawData[13].response, { 8:5, 12:9, 13:6, 10:6 }),
+          rsrq: getCurrentBands(rawData[13].response, { 8:6, 12:10, 13:7, 10:7 }),
+          sinr: getCurrentBandsSINR(rawData[13].response) || ["Unknown"],
         },
         networkAddressing: {
           publicIPv4: publicIPResponse.ok? (await publicIPResponse.json()).public_ip || "-" : "Can't fetch public IP",
@@ -476,126 +476,46 @@ const getCurrentBandsBandwidth = (response: string): string[] => {
     : ["Unknown"];
 };
 
-const getCurrentBandsPCI = (response: string, networkType: string): string[] => {
-  const getPCIFromParts = (parts: string[] | undefined): string => {
-    if (!parts) return "Unknown";
-    const pciIndex: 4 | 5 = (() => {
-      switch (parts.length) {
-        case 8: // length 8, PCI is at index 4, NR5G PCC and NR5G SCC Band when NR5G-NSA
-          return 4;
-        case 13: // length 13, PCI is at index 5, LTE SCC Band
-        case 12: // length 12, PCI is at index 5, NR5G SCC Band
-        case 10: // length 10, PCI is at index 5, LTE PCC Band
-        default:
-          return 5;
-      }
-    })();
-    return parts[pciIndex]?.trim() || "Unknown";
-  };
-  const extractPCI = (lines: string[]): string[] =>  lines
-      .map((line) => getPCIFromParts(line.split(":")[1]?.split(",")));
-
+const getCurrentBands = (response: string, dataMap: Record<number,number>): string[] => {
   const lines = response.split("\n");
-  const pccPCI = extractPCI(lines.filter((l)=> l.includes("PCC")))[0];
-  const sccPCIs = extractPCI(lines.filter((l) => l.includes("SCC")));
-  return [pccPCI, ...sccPCIs].filter((pci) => pci !== "Unknown");
-
+  const pcc = extractBandField(lines.filter((l)=> l.includes("PCC")),dataMap)[0];
+  const scc = extractBandField(lines.filter((l) => l.includes("SCC")),dataMap);
+  return [pcc, ...scc].filter((pci) => pci !== "Unknown");
 };
 
-const getCurrentBandsRSRP = (
-  response: string,
-): string[] => {
-  const getRSRPFromParts = (parts: string[] | undefined): string => {
-    if (!parts) return "Unknown";
-    const pciIndex: 5 | 6 |9 = (() => {
-      switch (parts.length) {
-        case 8: // length 8, PCI is at index 4, NR SA PCC and NR NSA SCC Band when NR5G-NSA
-          return 5;
-        case 12: // length 12, PCI is at index 5, NR NSA/SA SCC Band X
-          return 9;
-        case 13: // length 13, PCI is at index 5, LTE SCC Band X
-        case 10: // length 10, PCI is at index 5, LTE/NR NSA PCC Band X
-        default:
-          return 6;
-      }
-    })();
-    return parts[pciIndex]?.trim() || "Unknown";
-  };
-
-  const extractRSRP = (lines: string[]): string[] => {
-    return lines
-      .map((line) => getRSRPFromParts(line.split(":")[1]?.split(",")));
-  };
-  const lines = response.split("\n");
-  const pccRSRP = extractRSRP(lines.filter((l)=> l.includes("PCC")))[0];
-  const sccRSRPs = extractRSRP(lines.filter((l) => l.includes("SCC")));
-  return [pccRSRP, ...sccRSRPs].filter((pci) => pci !== "Unknown");
-};
-
-const getCurrentBandsRSRQ = (
-  response: string,
-): string[] => {
-  const getRSRQFromParts = (parts: string[] | undefined): string => {
-    if (!parts) return "Unknown";
-    const pciIndex: 6 | 7 | 10 = (() => {
-      switch (parts.length) {
-        case 8: // length 8, PCI is at index 4, NR SA PCC and NR NSA SCC Band when NR5G-NSA
-          return 6;
-        case 12: // length 12, PCI is at index 5, NR NSA/SA SCC Band X
-          return 10;
-        case 13: // length 13, PCI is at index 5, LTE SCC Band X
-        case 10: // length 10, PCI is at index 5, LTE/NR NSA PCC Band X
-        default:
-          return 7;
-      }
-    })();
-    return parts[pciIndex]?.trim() || "Unknown";
-  };
-
-  const extractRSRQ = (lines: string[]): string[] => {
-    return lines
-      .map((line) => getRSRQFromParts(line.split(":")[1]?.split(",")));
-  };
-  const lines = response.split("\n");
-  const pccRSRQ = extractRSRQ(lines.filter((l)=> l.includes("PCC")))[0];
-  const sccRSRQs = extractRSRQ(lines.filter((l) => l.includes("SCC")));
-  return [pccRSRQ, ...sccRSRQs].filter((pci) => pci !== "Unknown");
-};
 
 const getCurrentBandsSINR = (
   response: string,
-  networkType: string,
 ): string[] => {
-  const getSINRFromParts = (parts: string[] | undefined): string => {
-    if (!parts) return "Unknown";
-    const pciIndex: 7 | 9 | 11 = (() => {
-      switch (parts.length) {
-        case 8: // length 8, NR SA PCC and NR NSA SCC Band when NR5G-NSA
-          return 7;
-        case 12: // length 12, NR NSA/SA SCC Band X
-          return 11;
-        case 13: // length 13, LTE SCC Band X
-        case 10: // length 10, LTE/NR NSA PCC Band X
-        default:
-          return 9;
-      }
-    })();
-    return parts[pciIndex]?.trim() || "Unknown";
-  };
-
-  const extractSINR = (lines: string[], networkType: string): string[] => 
+  // special because of the formatting depending on the network type in the band list from CAINFO
+  const extractSINR = (lines: string[], dataMap: Record<number,number>): string[] => 
     lines
       .map((line) => {
-        const rawSINR = getSINRFromParts(line.split(":")[1]?.split(","));
+        const rawSINR = getCurrentBandsFieldFromParts(line.split(":")[1]?.split(","), dataMap, "Unknown");
         if (rawSINR === "-32768") return "-";
         return !isNaN(parseInt(rawSINR)) && !line.includes("LTE")  ? Math.round(parseInt(rawSINR) / 100).toString() : rawSINR || "Unknown";
       });
 
+  const dataMap = { 8:7, 12:11, 13:9, 10:9 };
   const lines = response.split("\n");
-  const pccSINR = extractSINR(lines.filter((l)=> l.includes("PCC")), networkType)[0];
-  const sccSINRs = extractSINR(lines.filter((l) => l.includes("SCC")),networkType);
-  return [pccSINR, ...sccSINRs].filter((c) => c !== "Unknown");
+  const pcc = extractSINR(lines.filter((l)=> l.includes("PCC")), dataMap)[0];
+  const scc = extractSINR(lines.filter((l) => l.includes("SCC")),dataMap);
+  return [pcc, ...scc].filter((c) => c !== "Unknown");
 };
+
+const getCurrentBandsFieldFromParts = (
+  parts: string[],
+  dataMap: Record<string, number>,
+  defaultValue: string,
+): string => {
+  if (!parts) return defaultValue;
+  const index = dataMap[parts.length] || 0;
+  return parts[index]?.trim() || defaultValue;
+};
+
+const extractBandField = (
+  lines: string[], dataMap: Record<string, number>): string[] =>
+  lines.map((line) => getCurrentBandsFieldFromParts(line.split(":")[1]?.split(","), dataMap, "Unknown"));
 
 const getMimoLayers = (response: string): string => {
   const INVALID_VALUES = [-32768, -140];
