@@ -1,6 +1,14 @@
 // constants.ts
 
-import { BandwidthMap, AccessTechMap } from "@/types/types"
+import { BandwidthMap, AccessTechMap, StateMap } from "@/types/types"
+
+export const STATE_MAP: StateMap = {
+  1: "Registered",
+  2: "Searching",
+  3: "Denied",
+  4: "Unknown",
+  5: "Roaming",
+};
 
 export const BANDWIDTH_MAP: BandwidthMap = {
   "6": "1.4 MHz",

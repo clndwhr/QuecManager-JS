@@ -28,8 +28,9 @@
 
 // hooks/useHomeData.ts
 import { useState, useEffect, useCallback } from "react";
-import { HomeData } from "@/types/types";
-import { BANDWIDTH_MAP, NR_BANDWIDTH_MAP } from "@/constants/home/index";
+import { HomeData, BandwidthMap } from "@/types/types";
+import { BANDWIDTH_MAP, NR_BANDWIDTH_MAP, STATE_MAP } from "@/constants/home/index";
+// import { Line } from "recharts";
 
 const useHomeData = () => {
   const [data, setData] = useState<HomeData | null>(null);
@@ -150,7 +151,7 @@ const useHomeData = () => {
         },
         connection: {
           apn: parseField(rawData[7]?.response, 1, 1, 2, parseField(rawData[12]?.response, 1, 1, 2)),
-          operatorState: getOperatorState(rawData[8]?.response, rawData[16]?.response) || "Unknown",
+          operatorState: getOperatorState(rawData[8]?.response, rawData[16]?.response),
           functionalityState: parseField(rawData[9]?.response, 1, 1, 0) === "1" ? "Enabled" : "Disabled",
           networkType: getNetworkType(rawData[13].response) || "No Signal",
           modemTemperature: getModemTemperature(rawData[11].response) || "Unknown",
@@ -344,17 +345,10 @@ const formatDNSAddress = (dnsAddress: string): string => {
 
 const getAccessTechnology = (response: string) => parseField(response, 1, 1, 3);
 
-const getOperatorState = (lteResponse: string, nr5gResponse: string): "Unknown" | "Registered" | "Searching" | "Denied" | "Roaming" | "Not Registered" => {
+const getOperatorState = (lteResponse: string, nr5gResponse: string): string => {
   const state =
     Number(parseField(lteResponse, 1, 1, 1)) || Number(parseField(nr5gResponse, 1, 1, 1));
-  const stateMap: Record<number, "Unknown" | "Registered" | "Searching" | "Denied" | "Roaming" | "Not Registered"> = {
-    1: "Registered",
-    2: "Searching",
-    3: "Denied",
-    4: "Unknown",
-    5: "Roaming",
-  };
-  return stateMap[state] || "Not Registered";
+  return STATE_MAP[state] || "Not Registered";
 };
 
 const getNetworkType = (response: string) => {
@@ -365,10 +359,7 @@ const getNetworkType = (response: string) => {
 };
 
 const getModemTemperature = (response: string) => {
-  const temps = ["cpuss-0", "cpuss-1", "cpuss-2", "cpuss-3"].map((cpu) => {
-    const line = response.split("\n").find((l) => l.includes(cpu));
-    return parseInt(line!?.split(":")[1]?.split(",")[1].replace(/"/g, "").trim());
-  });
+  const temps = ["cpuss-0", "cpuss-1", "cpuss-2", "cpuss-3"].map((cpu) => parseInt(response.split("\n").find((l) => l.includes(cpu))!?.split(":")[1]?.split(",")[1].replace(/"/g, "").trim()));
   const avgTemp = temps.reduce((acc, t) => acc + t, 0) / temps.length;
   return `${Math.round(avgTemp)}°C`;
 };
@@ -400,20 +391,16 @@ const getSignalStrength = (response: string): string => {
 
 // Function to parse the TAC and CellID from the response and return the values from Hex to Decimal format based on the lineIndex and fieldIndex of the respective Index Maps
 const extractValueByNetworkType = (response: string, networkType: string, lineIndexMap: Record<string, number>, fieldIndexMap: Record<string, number>, raw = false): string => {
-  const lineIndex = lineIndexMap[networkType];
-  const fieldIndex = fieldIndexMap[networkType];
-  return lineIndex !== undefined && fieldIndex !== undefined && !raw
-    ? parseInt(parseField(response, lineIndex, 1, fieldIndex), 16).toString().toUpperCase()
-    : lineIndex !== undefined && fieldIndex !== undefined && raw
-    ? parseField(response, lineIndex, 1, fieldIndex).toUpperCase()
+  return lineIndexMap[networkType] !== undefined && fieldIndexMap[networkType] !== undefined && !raw
+    ? parseInt(parseField(response, lineIndexMap[networkType], 1, fieldIndexMap[networkType]), 16).toString().toUpperCase()
+    : lineIndexMap[networkType] !== undefined && fieldIndexMap[networkType] !== undefined && raw
+    ? parseField(response, lineIndexMap[networkType], 1, fieldIndexMap[networkType]).toUpperCase()
     : "Unknown";
 };
 
 // Function to get the MNC or MCC based on the network type and field index map
 const getNetworkCode = (response: string, networkType: string, fieldIndexMap: Record<string, number>): string => {
-  const lineIndex = networkType === "NR5G-NSA" ? 2 : 1;
-  const fieldIndex = fieldIndexMap[networkType];
-  return parseField(response, lineIndex, 1, fieldIndex);
+  return parseField(response, networkType === "NR5G-NSA" ? 2 : 1, 1, fieldIndexMap[networkType]);
 };
 
 const getSignalQuality = (response: string): string => {
@@ -440,47 +427,35 @@ const getSignalQuality = (response: string): string => {
 const getCurrentBandsBandNumber = (response: string): string[] => {
   const extractBands = (lines: string[]): string[] =>
     lines.map((line) => parseField(line, 0, 1, 3, "Unknown", ":", ","));
-
   const bandsLte = extractBands(response.split("\n").filter((line) => line.includes("LTE BAND")));
   const bandsNr5g = extractBands(response.split("\n").filter((line) => line.includes("NR5G BAND")));
-
-  const allBands = [...bandsLte, ...bandsNr5g];
-  return allBands.length ? allBands : ["Unknown"];
+  return [...bandsLte, ...bandsNr5g].length ? [...bandsLte, ...bandsNr5g] : ["Unknown"];
 };
 
+const extactFieldData = (data: string, type: string, hasMap?: boolean, dMap?: BandwidthMap ): string[] => {
+  return data.split("\n").filter(l => l.includes(type)).map((l) => {
+    return hasMap && dMap !== undefined ? dMap[l.split(":")[1]?.split(",")[2] as keyof typeof dMap] || "Unknown" : l.split(":")[1]?.split(",")[1]?.trim() || "Unknown";
+  })
+}
+
 const getCurrentBandsEARFCN = (response: string): string[] => {
-  const extractEARFCNs = (type: string) =>
-    response
-      .split("\n")
-      .filter((line) => line.includes(type))
-      .map((line) => line.split(":")[1]?.split(",")[1]?.trim() || "Unknown");
-
-  const earfcnsLte = extractEARFCNs("LTE BAND");
-  const earfcnsNr5g = extractEARFCNs("NR5G BAND");
-
+  const earfcnsLte = extactFieldData(response, "LTE BAND");
+  const earfcnsNr5g = extactFieldData(response, "NR5G BAND");
   return [...earfcnsLte, ...earfcnsNr5g].length ? [...earfcnsLte, ...earfcnsNr5g] : ["Unknown"];
 };
 
 const getCurrentBandsBandwidth = (response: string): string[] => {
-  const extractBandwidths = (type: string, map: Record<string, string>) =>
-    response
-      .split("\n")
-      .filter((line) => line.includes(type))
-      .map((line) => map[line.split(":")[1]?.split(",")[2]] || "Unknown");
-
-  const bandwidthsLte = extractBandwidths("LTE BAND", BANDWIDTH_MAP);
-  const bandwidthsNr5g = extractBandwidths("NR5G BAND", NR_BANDWIDTH_MAP);
-
+  const bandwidthsLte = extactFieldData(response, "LTE BAND", true, BANDWIDTH_MAP);
+  const bandwidthsNr5g = extactFieldData(response, "NR5G BAND", true, NR_BANDWIDTH_MAP);
   return [...bandwidthsLte, ...bandwidthsNr5g].length
     ? [...bandwidthsLte, ...bandwidthsNr5g]
     : ["Unknown"];
 };
 
 const getCurrentBands = (response: string, dataMap: Record<number,number>): string[] => {
-  const lines = response.split("\n");
-  const pcc = extractBandField(lines.filter((l)=> l.includes("PCC")),dataMap)[0];
-  const scc = extractBandField(lines.filter((l) => l.includes("SCC")),dataMap);
-  return [pcc, ...scc].filter((pci) => pci !== "Unknown");
+  const pcc = extractBandField(response.split("\n").filter((l)=> l.includes("PCC")),dataMap)[0];
+  const scc = extractBandField(response.split("\n").filter((l) => l.includes("SCC")),dataMap);
+  return [pcc, ...scc].filter((c) => c !== "Unknown");
 };
 
 
@@ -497,12 +472,12 @@ const getCurrentBandsSINR = (
       });
 
   const dataMap = { 8:7, 12:11, 13:9, 10:9 };
-  const lines = response.split("\n");
-  const pcc = extractSINR(lines.filter((l)=> l.includes("PCC")), dataMap)[0];
-  const scc = extractSINR(lines.filter((l) => l.includes("SCC")),dataMap);
+  const pcc = extractSINR(response.split("\n").filter((l)=> l.includes("PCC")), dataMap)[0];
+  const scc = extractSINR(response.split("\n").filter((l) => l.includes("SCC")),dataMap);
   return [pcc, ...scc].filter((c) => c !== "Unknown");
 };
 
+// dataMap is a map of lengths as it pertains to the index for the desired return designed after the AT+CAINFO=1;+CAINFO response
 const getCurrentBandsFieldFromParts = (
   parts: string[],
   dataMap: Record<string, number>,

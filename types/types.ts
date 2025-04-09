@@ -12,13 +12,7 @@ export interface SimCardData {
 
 export interface ConnectionData {
   apn: string;
-  operatorState:
-    | "Registered"
-    | "Searching"
-    | "Denied"
-    | "Unknown"
-    | "Roaming"
-    | "Not Registered";
+  operatorState: string;
   functionalityState: "Enabled" | "Disabled";
   networkType: "NR5G-NSA" | "LTE" | "NR5G-SA" | "No Signal";
   modemTemperature: string;
@@ -136,6 +130,10 @@ export interface DiagnosticsData {
 }
 
 // You might also want to define some utility types for the bandwidth maps and access tech map
+
+export type StateMap = {
+  [key: number]: string
+}
 
 export type BandwidthMap = {
   [key: string]: string;
