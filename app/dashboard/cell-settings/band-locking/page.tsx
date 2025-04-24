@@ -16,6 +16,9 @@ import { LockIcon, RefreshCw, AlertCircle } from "lucide-react";
 import { atCommandSender } from "@/utils/at-command"; // Import from utils
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+import {processSet} from "@/hooks/processAtResults";
+
+
 type BandType = "lte" | "nsa" | "sa";
 
 interface BandState {
@@ -32,6 +35,11 @@ interface ProfileControllState {
 
 interface ATResponse {
   response: string;
+}
+interface ResponseData {
+  response: string;
+  command: string;
+  status: string;
 }
 
 interface ProfileStatus {
@@ -209,7 +217,8 @@ const BandLocking = () => {
       }
 
       const data: ATResponse[] = await response.json();
-
+      const tdata: ResponseData[] = data.map((item) => item as ResponseData);
+      processSet(tdata);
       // Parse supported bands from first response
       const supportedBandsResponse = data[0].response;
       const newBands: BandState = {

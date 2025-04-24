@@ -26,7 +26,13 @@
  */
 import { useState } from "react";
 import { DiagnosticsData } from "@/types/types";
+import {processSet} from "@/hooks/processAtResults";
 
+interface ResponseData {
+  command: string;
+  response: string;
+  status: string;
+}
 const useRunDiagnostics = () => {
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [diagnosticsData, setDiagnosticsData] =
@@ -226,7 +232,7 @@ const useRunDiagnostics = () => {
       const response = await fetch("/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=6");
       const data = await response.json();
       console.log("Diagnostics data:", data);
-
+      processSet(data);
       const processedData: DiagnosticsData = {
         netRegistration: getRegistrationStatus(
           data[0].response,

@@ -17,9 +17,17 @@ import { Separator } from "@/components/ui/separator";
 import { ModeToggle } from "@/components/dark-mode-toggle";
 import { calculateSignalPercentage } from "@/utils/signalMetrics";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
+import {processSet} from "@/hooks/processAtResults";
 
-interface ModemResponse {
+interface ResponseData {
+  command: string;
   response: string;
+  status: string;
+}
+interface ModemResponse {
+  command?: string;
+  response: string;
+  status?: string;
 }
 
 interface ChartDataItem {
@@ -63,8 +71,9 @@ export default function ChartPreviewSignal() {
       try {
         const response = await fetch("/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=5");
         const data: ModemResponse[] = await response.json();
+        const tdata: ResponseData[] = data.map((item) => item as ResponseData);
         console.log(data);
-
+        processSet(tdata);
         if (data) {
           const newData: SignalData = {
             rsrp: processSignalValues(data[0].response.match(/-?\d+/g)),

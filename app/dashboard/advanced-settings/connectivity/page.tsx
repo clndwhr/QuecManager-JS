@@ -41,6 +41,9 @@ import { atCommandSender } from "@/utils/at-command";
 import { PowerIcon } from "lucide-react";
 import EthernetCard from "@/components/home/ethernet-card";
 
+import {processSet} from "@/hooks/processAtResults";
+
+
 interface MacAddress {
   mac: string;
   hostname: string;
@@ -305,6 +308,9 @@ const ConnectivitySettingsPage = () => {
         ]);
 
         setMacAddresses(macsData);
+        
+        processSet(macsData); // Process the MAC addresses
+        processSet(advanceData); // Process the advance settings
 
         const parsedSettings = parseAdvanceSettings(advanceData);
         setInitialSettings(parsedSettings);

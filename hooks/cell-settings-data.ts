@@ -45,7 +45,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { CellSettingsData } from "@/types/types";
 import { get } from "http";
+import {processSet} from "@/hooks/processAtResults";
 
+interface ResponseData {
+  command: string;
+  response: string;
+  status: string;
+}
 interface APNProfile {
   cid: string;
   pdpType: string;
@@ -68,7 +74,7 @@ const useCellSettingsData = () => {
       );
       const rawData = await response.json();
       console.log("Fetched cell settings data:", rawData);
-
+      processSet(rawData);
       const processedData: CellSettingsData = {
         APNProfiles: getAPNProfiles(
           rawData[0].response,

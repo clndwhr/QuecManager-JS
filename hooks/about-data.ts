@@ -35,7 +35,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { AboutData } from "@/types/types";
+import {processSet} from "@/hooks/processAtResults";
 
+interface ResponseData {
+  command: string;
+  response: string;
+  status: string;
+}
 const useAboutData = () => {
   const [data, setData] = useState<AboutData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -74,8 +80,6 @@ const useAboutData = () => {
         deviceResponse.json(),
         uptimeResponse.json(),
       ]);
-
-      console.log("Raw data:", rawData);
 
       const processedData: AboutData = {
         manufacturer: rawData[0].response.split("\n")[1].trim(),
@@ -133,6 +137,8 @@ const useAboutData = () => {
           .replace(/R/g, "")
           .trim(),
       };
+      processSet(rawData);
+      console.log("Raw data:", rawData);
 
       setData(processedData);
       // console.log("Processed data:", processedData);

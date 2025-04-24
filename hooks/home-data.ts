@@ -32,6 +32,8 @@ import { HomeData, BandwidthMap } from "@/types/types";
 import { BANDWIDTH_MAP, NR_BANDWIDTH_MAP, STATE_MAP } from "@/constants/home/index";
 // import { Line } from "recharts";
 
+import {processSet} from "@/hooks/processAtResults";
+
 const useHomeData = () => {
   const [data, setData] = useState<HomeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +56,6 @@ const useHomeData = () => {
         // After max retries, show error state and fallback data
         console.error("Max retry attempts reached. Please refresh manually.");
         setError(err);
-
         // Set fallback data with "Unknown" values
         setData({
           simCard: {
@@ -132,6 +133,11 @@ const useHomeData = () => {
 
       const rawData = await response.json();
       console.log(rawData); //
+      try {
+        processSet(rawData);
+      } catch (error) {
+        // console.error;
+      }
 
       // fetch public ip from /cgi-bin/quecmanager/home/fetch_public_ip.sh
       const publicIPResponse = await fetch(

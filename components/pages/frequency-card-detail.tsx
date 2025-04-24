@@ -42,7 +42,7 @@ interface NR5GCellInfo extends BaseCellInfo {
   carrierBandwidth: number;
   offsetToPointA: number;
   ssbSubcarrierOffset: number;
-  ssbScs: number;
+  ssbScs: number | "-";
 }
 
 interface LTEFrequencyInfo {

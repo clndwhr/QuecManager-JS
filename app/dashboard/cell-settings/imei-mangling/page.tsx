@@ -27,6 +27,9 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { atCommandSender } from "@/utils/at-command";
 
+import {processSet} from "@/hooks/processAtResults";
+
+
 interface Profile {
   name: string;
   iccid: string;
@@ -63,7 +66,7 @@ const IMEIManglingPage = () => {
         "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=3"
       );
       const rawData = await response.json();
-
+      processSet(rawData); // Process the response set
       console.log(rawData);
       // Use the 6th index to get the IMEI
       const rawResult = rawData[6].response.split("\n")[1];

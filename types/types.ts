@@ -222,3 +222,13 @@ export const LTE_RB_BANDWIDTH_MAP: BandwidthMap = {
   "-" : "-" 
 };
 
+export interface ResponseData {
+  command: string;
+  response: string;
+  status: string;
+}
+
+export interface FieldData {
+  value: string | number;
+  description: string;
+}

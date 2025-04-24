@@ -30,6 +30,8 @@ import { useToast } from "@/hooks/use-toast";
 import ScheduledLockingCard from "@/components/cell-settings/scheduled-cell-locking-card";
 import { atCommandSender } from "@/utils/at-command"; // Import the utility
 
+import {processSet} from "@/hooks/processAtResults";
+
 const CellLockingPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -83,7 +85,7 @@ const CellLockingPage = () => {
         "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=8"
       );
       const data = await response.json();
-
+      processSet(data);
       if (!response.ok) {
         throw new Error("Failed to fetch current status");
       }

@@ -60,6 +60,14 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
+import {processSet} from "@/hooks/processAtResults";
+
+interface ResponseData {
+  command: string;
+  response: string;
+  status: string;
+}
+
 // Updated Type definitions for our profile data
 interface Profile {
   name: string;
@@ -153,6 +161,13 @@ const QuecProfilesPage = () => {
       }
       
       const data = await response.json() as ATCommandResponse[];
+      const tdata: ResponseData[] = data.map((item) => item as ResponseData);
+      processSet(
+        tdata.map((item) => ({
+          ...item,
+          command: item.command || "", // Ensure command is a string
+        }))
+      );
       console.log("Device info response:", data);
       
       let iccid = "";
