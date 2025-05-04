@@ -1,0 +1,470 @@
+{
+    "set1": [
+        {
+            "command": "AT+QUIMSLOT?",
+            "response": "AT+QUIMSLOT?\n+QUIMSLOT: 1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CNUM",
+            "response": "AT+CNUM\n+CNUM: ,\"14023017075\",129\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+COPS?",
+            "response": "AT+COPS?\n+COPS: 0,0,\"T-Mobile\",11\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CIMI",
+            "response": "AT+CIMI\n310260485954539\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+ICCID",
+            "response": "AT+ICCID\n+ICCID: 8901260487759545390F\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGSN",
+            "response": "AT+CGSN\n350596531481979\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CPIN?",
+            "response": "AT+CPIN?\n+CPIN: READY\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGDCONT?",
+            "response": "AT+CGDCONT?\n+CGDCONT: 1,\"IPV4V6\",\"fbb.home\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 2,\"IPV4V6\",\"ims\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 3,\"IPV4V6\",\"sos\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,1,,,,,,,,,,\"\",,,,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CREG?",
+            "response": "AT+CREG?\n+CREG: 0,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CFUN?",
+            "response": "AT+CFUN?\n+CFUN: 1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QENG=\"servingcell\"",
+            "response": "AT+QENG=\"servingcell\"\n+QENG: \"servingcell\",\"NOCONN\",\"NR5G-SA\",\"TDD\",310,260,105FB012D,153,A80000,501390,41,12,-76,-10,26,1,-\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QTEMP",
+            "response": "AT+QTEMP\n+QTEMP: \"sdr0\",\"34\"\n+QTEMP: \"mmw0\",\"-273\"\n+QTEMP: \"aoss-0\",\"37\"\n+QTEMP: \"cpuss-0\",\"41\"\n+QTEMP: \"cpuss-1\",\"41\"\n+QTEMP: \"cpuss-2\",\"41\"\n+QTEMP: \"cpuss-3\",\"41\"\n+QTEMP: \"ethphy-0\",\"39\"\n+QTEMP: \"mvmss-0\",\"38\"\n+QTEMP: \"mdmq6-0\",\"39\"\n+QTEMP: \"ctile\",\"37\"\n+QTEMP: \"mdmss-0\",\"38\"\n+QTEMP: \"mdmss-1\",\"38\"\n+QTEMP: \"mdmss-2\",\"38\"\n+QTEMP: \"sys-therm-1\",\"34\"\n+QTEMP: \"sys-therm-2\",\"-40\"\n+QTEMP: \"sys-therm-4\",\"35\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGCONTRDP",
+            "response": "AT+CGCONTRDP\n+CGCONTRDP: 1,4,\"fbb.home\",\"38.7.251.144.44.169.21.31.10.210.110.87.100.94.204.156\", \"254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QCAINFO=1;+QCAINFO;+QCAINFO=0",
+            "response": "AT+QCAINFO=1;+QCAINFO;+QCAINFO=0\n+QCAINFO: \"PCC\",501390,12,\"NR5G BAND 41\",153,-79,-11,2582\n+QCAINFO: \"SCC\",393850,3,\"NR5G BAND 25\",1,696,0,-,-,0,0,-32768\n+QCAINFO: \"SCC\",521310,11,\"NR5G BAND 41\",1,153,0,-,-,-76,-11,427\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QRSRP",
+            "response": "AT+QRSRP\n+QRSRP: -77,-75,-140,-140,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"WWAN\"",
+            "response": "AT+QMAP=\"WWAN\"\n+QMAP: \"WWAN\",1,1,\"IPV4\",\"192.0.0.2\"\n+QMAP: \"WWAN\",1,1,\"IPV6\",\"2607:fb90:2ca9:151f:2507:4e2e:8911:53e3\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+C5GREG=2;+C5GREG?",
+            "response": "AT+C5GREG=2;+C5GREG?\n+C5GREG: 2,1,\"A80000\",\"105FB012D\",11,1,\"01\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGREG=2;+CGREG?",
+            "response": "AT+CGREG=2;+CGREG?\n+CGREG: 2,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QRSRQ",
+            "response": "AT+QRSRQ\n+QRSRQ: -10,-10,-32768,-32768,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QSINR",
+            "response": "AT+QSINR\n+QSINR: 25,25,-32768,-32768,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGCONTRDP",
+            "response": "AT+CGCONTRDP\n+CGCONTRDP: 1,4,\"fbb.home\",\"38.7.251.144.44.169.21.31.10.210.110.87.100.94.204.156\", \"254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"lte_time_advance\",1;+QNWCFG=\"lte_time_advance\"",
+            "response": "AT+QNWCFG=\"lte_time_advance\",1;+QNWCFG=\"lte_time_advance\"\n+QNWCFG: \"lte_time_advance\",1,92\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"nr5g_time_advance\",1;+QNWCFG=\"nr5g_time_advance\"",
+            "response": "AT+QNWCFG=\"nr5g_time_advance\",1;+QNWCFG=\"nr5g_time_advance\"\n+QNWCFG: \"nr5g_time_advance\",1,94720,39936\n",
+            "status": "success"
+        }
+    ],
+    "set2": [
+        {
+            "command": "AT+CGDCONT?",
+            "response": "AT+CGDCONT?\n+CGDCONT: 1,\"IPV4V6\",\"fbb.home\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 2,\"IPV4V6\",\"ims\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 3,\"IPV4V6\",\"sos\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,1,,,,,,,,,,\"\",,,,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGCONTRDP",
+            "response": "AT+CGCONTRDP\n+CGCONTRDP: 1,4,\"fbb.home\",\"38.7.251.144.44.169.21.31.10.210.110.87.100.94.204.156\", \"254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWPREFCFG=\"mode_pref\"",
+            "response": "AT+QNWPREFCFG=\"mode_pref\"\n+QNWPREFCFG: \"mode_pref\",AUTO\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWPREFCFG=\"nr5g_disable_mode\"",
+            "response": "AT+QNWPREFCFG=\"nr5g_disable_mode\"\n+QNWPREFCFG: \"nr5g_disable_mode\",0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QUIMSLOT?",
+            "response": "AT+QUIMSLOT?\n+QUIMSLOT: 1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CFUN?",
+            "response": "AT+CFUN?\n+CFUN: 1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMBNCFG=\"AutoSel\"",
+            "response": "AT+QMBNCFG=\"AutoSel\"\n+QMBNCFG: \"AutoSel\",1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMBNCFG=\"list\"",
+            "response": "AT+QMBNCFG=\"list\"\n+QMBNCFG: \"List\",0,1,1,\"Commercial-TMO\",0x0A01050F,202408301\n+QMBNCFG: \"List\",1,0,0,\"ROW_Commercial\",0x0A010809,202408051\n+QMBNCFG: \"List\",2,0,0,\"TEF_Spain_Commercial\",0x0A010C00,202302241\n+QMBNCFG: \"List\",3,0,0,\"FirstNet\",0x0A015300,202302241\n+QMBNCFG: \"List\",4,0,0,\"Rogers_Canada\",0x0A014800,202302241\n+QMBNCFG: \"List\",5,0,0,\"Bell_Canada\",0x0A014700,202302241\n+QMBNCFG: \"List\",6,0,0,\"Telus_Canada\",0x0A014900,202302241\n+QMBNCFG: \"List\",7,0,0,\"Commercial-Sprint\",0x0A010204,202302241\n+QMBNCFG: \"List\",8,0,0,\"VoLTE-ATT\",0x0A010335,202302241\n+QMBNCFG: \"List\",9,0,0,\"CDMAless_Private-Verizon\",0x0A01FD28,202408301\n+QMBNCFG: \"List\",10,0,0,\"CDMAless-Verizon\",0x0A010126,202408301\n+QMBNCFG: \"List\",11,0,0,\"Swiss-Comm\",0x0A010411,202404081\n+QMBNCFG: \"List\",12,0,0,\"Telia_Sweden\",0x0A012400,202302241\n+QMBNCFG: \"List\",13,0,0,\"TIM_Italy_Commercial\",0x0A012B00,202302241\n+QMBNCFG: \"List\",14,0,0,\"France-Commercial-Orange\",0x0A010B21,202302241\n+QMBNCFG: \"List\",15,0,0,\"Commercial-DT-VOLTE\",0x0A011F1F,202302241\n+QMBNCFG: \"List\",16,0,0,\"Germany-VoLTE-Vodafone\",0x0A010449,202408281\n+QMBNCFG: \"List\",17,0,0,\"UK-VoLTE-Vodafone\",0x0A010426,202408281\n+QMBNCFG: \"List\",18,0,0,\"Commercial-EE\",0x0A01220B,202302241\n+QMBNCFG: \"List\",19,0,0,\"Optus_Australia_Commercial\",0x0A014400,202302241\n+QMBNCFG: \"List\",20,0,0,\"Telstra_Australia_Commercial\",0x0A010F00,202411261\n+QMBNCFG: \"List\",21,0,0,\"Commercial-LGU\",0x0A012608,202302241\n+QMBNCFG: \"List\",22,0,0,\"Commercial-KT\",0x0A01280B,202302241\n+QMBNCFG: \"List\",23,0,0,\"Commercial-SKT\",0x0A01270A,202302241\n+QMBNCFG: \"List\",24,0,0,\"Commercial-Reliance\",0x0A011B0C,202302241\n+QMBNCFG: \"List\",25,0,0,\"Commercial-SBM\",0x0A011C0B,202302241\n+QMBNCFG: \"List\",26,0,0,\"Commercial-KDDI\",0x0A010709,202302241\n+QMBNCFG: \"List\",27,0,0,\"Commercial-DCM\",0x0A010D0D,202302241\n+QMBNCFG: \"List\",28,0,0,\"CBN_Commercial\",0x0A012300,202411261\n+QMBNCFG: \"List\",29,0,0,\"VoLTE-CU\",0x0A011561,202307281\n+QMBNCFG: \"List\",30,0,0,\"VoLTE_OPNMKT_CT\",0x0A0113E0,202302241\n+QMBNCFG: \"List\",31,0,0,\"Volte_OpenMkt-Commercial-CMCC\",0x0A012010,202409041\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"WWAN\"",
+            "response": "AT+QMAP=\"WWAN\"\n+QMAP: \"WWAN\",1,1,\"IPV4\",\"192.0.0.2\"\n+QMAP: \"WWAN\",1,1,\"IPV6\",\"2607:fb90:2ca9:151f:2507:4e2e:8911:53e3\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"lte_ambr\"",
+            "response": "AT+QNWCFG=\"lte_ambr\"",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"nr5g_ambr\"",
+            "response": "AT+QNWCFG=\"nr5g_ambr\"\n+QNWCFG: \"nr5g_ambr\",\"fbb.home\",6,4294,6,4294\n",
+            "status": "success"
+        }
+    ],
+    "set3": [
+        {
+            "command": "AT+CGMI",
+            "response": "AT+CGMI\nQuectel\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGMM",
+            "response": "AT+CGMM\nRM551E-GL\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QGMR",
+            "response": "AT+QGMR\nRM551EGL00AAR01A03M8G_A0.001.A0.001\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CNUM",
+            "response": "AT+CNUM\n+CNUM: ,\"14023017075\",129\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CIMI",
+            "response": "AT+CIMI\n310260485954539\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+ICCID",
+            "response": "AT+ICCID\n+ICCID: 8901260487759545390F\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGSN",
+            "response": "AT+CGSN\n350596531481979\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"LANIP\"",
+            "response": "AT+QMAP=\"LANIP\"\n+QMAP: \"LANIP\",192.168.224.100,192.168.227.99,192.168.224.1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"WWAN\"",
+            "response": "AT+QMAP=\"WWAN\"\n+QMAP: \"WWAN\",1,1,\"IPV4\",\"192.0.0.2\"\n+QMAP: \"WWAN\",1,1,\"IPV6\",\"2607:fb90:2ca9:151f:2507:4e2e:8911:53e3\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QGETCAPABILITY",
+            "response": "AT+QGETCAPABILITY\n+QGETCAPABILITY: NR:1,2,3,5,7,8,12,14,20,25,26,28,30,38,40,41,48,71,75,77,78,79,92,257,258,259,260,261\n+QGETCAPABILITY: LTE-FDD:1,2,3,4,5,7,8,12,13,14,17,18,19,20,25,26,28,29,30,32,66,70,71\n+QGETCAPABILITY: LTE-TDD:34,38,39,40,41,42,43,46,48,53\n+QGETCAPABILITY: WCDMA:1,2,4,5,8,19\n+QGETCAPABILITY: LTE-CATEGORY:20\n+QGETCAPABILITY: LTE-CA:1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"3gpp_rel\"",
+            "response": "AT+QNWCFG=\"3gpp_rel\"\n+QNWCFG: \"3gpp_rel\",R17,R17\n",
+            "status": "success"
+        }
+    ],
+    "set4": [
+        {
+            "command": "AT+QMAP=\"MPDN_RULE\"",
+            "response": "AT+QMAP=\"MPDN_RULE\"\n+QMAP: \"MPDN_rule\",0,0,0,0,0\n+QMAP: \"MPDN_rule\",1,0,0,0,0\n+QMAP: \"MPDN_rule\",2,0,0,0,0\n+QMAP: \"MPDN_rule\",3,0,0,0,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"DHCPV4DNS\"",
+            "response": "AT+QMAP=\"DHCPV4DNS\"\n+QMAP: \"DHCPV4DNS\",\"disable\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QCFG=\"usbnet\"",
+            "response": "AT+QCFG=\"usbnet\"\n+QCFG: \"usbnet\",1\n",
+            "status": "success"
+        }
+    ],
+    "set5": [
+        {
+            "command": "AT+QRSRP",
+            "response": "AT+QRSRP\n+QRSRP: -77,-76,-140,-140,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QRSRQ",
+            "response": "AT+QRSRQ\n+QRSRQ: -10,-10,-32768,-32768,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QSINR",
+            "response": "AT+QSINR\n+QSINR: 26,24,-32768,-32768,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QCAINFO",
+            "response": "AT+QCAINFO\n+QCAINFO: \"PCC\",501390,12,\"NR5G BAND 41\",153\n+QCAINFO: \"SCC\",393850,3,\"NR5G BAND 25\",1,696,0,-,-\n+QCAINFO: \"SCC\",521310,11,\"NR5G BAND 41\",1,153,0,-,-\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QSPN",
+            "response": "AT+QSPN\n+QSPN: \"T-Mobile\",\"T-Mobile\",\"\",0,\"310260\"\n",
+            "status": "success"
+        }
+    ],
+    "set6": [
+        {
+            "command": "AT+CEREG=2;+CEREG?",
+            "response": "AT+CEREG=2;+CEREG?\n+CEREG: 2,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+C5GREG=2;+C5GREG?",
+            "response": "AT+C5GREG=2;+C5GREG?\n+C5GREG: 2,1,\"A80000\",\"105FB012D\",11,1,\"01\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CPIN?",
+            "response": "AT+CPIN?\n+CPIN: READY\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGDCONT?",
+            "response": "AT+CGDCONT?\n+CGDCONT: 1,\"IPV4V6\",\"fbb.home\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 2,\"IPV4V6\",\"ims\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 3,\"IPV4V6\",\"sos\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,1,,,,,,,,,,\"\",,,,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGCONTRDP",
+            "response": "AT+CGCONTRDP\n+CGCONTRDP: 1,4,\"fbb.home\",\"38.7.251.144.44.169.21.31.10.210.110.87.100.94.204.156\", \"254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"WWAN\"",
+            "response": "AT+QMAP=\"WWAN\"\n+QMAP: \"WWAN\",1,1,\"IPV4\",\"192.0.0.2\"\n+QMAP: \"WWAN\",1,1,\"IPV6\",\"2607:fb90:2ca9:151f:2507:4e2e:8911:53e3\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QRSRP",
+            "response": "AT+QRSRP\n+QRSRP: -72,-74,-140,-140,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QTEMP",
+            "response": "AT+QTEMP\n+QTEMP: \"sdr0\",\"35\"\n+QTEMP: \"mmw0\",\"-273\"\n+QTEMP: \"aoss-0\",\"37\"\n+QTEMP: \"cpuss-0\",\"40\"\n+QTEMP: \"cpuss-1\",\"40\"\n+QTEMP: \"cpuss-2\",\"39\"\n+QTEMP: \"cpuss-3\",\"40\"\n+QTEMP: \"ethphy-0\",\"39\"\n+QTEMP: \"mvmss-0\",\"38\"\n+QTEMP: \"mdmq6-0\",\"39\"\n+QTEMP: \"ctile\",\"38\"\n+QTEMP: \"mdmss-0\",\"38\"\n+QTEMP: \"mdmss-1\",\"38\"\n+QTEMP: \"mdmss-2\",\"38\"\n+QTEMP: \"sys-therm-1\",\"35\"\n+QTEMP: \"sys-therm-2\",\"-40\"\n+QTEMP: \"sys-therm-4\",\"36\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNETRC?",
+            "response": "AT+QNETRC?\n+QNETRC: \"emm_cause\",0\n+QNETRC: \"esm_cause\",29\n+QNETRC: \"5gmm_cause\",0\n",
+            "status": "success"
+        }
+    ],
+    "set7": [
+        {
+            "command": "AT+QNWPREFCFG=\"policy_band\"",
+            "response": "AT+QNWPREFCFG=\"policy_band\"\n+QNWPREFCFG: \"gw_band\",1:2:4:5:6:8:19\n+QNWPREFCFG: \"lte_band\",1:2:3:4:5:8:12:13:14:17:18:19:20:25:26:28:29:30:32:34:39:40:41:42:43:46:48:53:66:70:71\n+QNWPREFCFG: \"nsa_nr5g_band\",1:2:3:5:7:8:12:14:20:25:26:28:30:38:40:41:48:66:71:75:77:78:79:92:257:258:259:260:261\n+QNWPREFCFG: \"nr5g_band\",1:2:3:5:7:8:12:13:14:18:20:25:26:28:29:30:38:40:41:48:53:66:70:71:75:77:78:79:91:92:93:94\n+QNWPREFCFG: \"nrdc_nr5g_band\",1:2:3:5:7:8:12:14:20:25:26:28:30:38:40:41:48:66:71:75:77:78:79:92:257:258:259:260:261\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWPREFCFG=\"lte_band\";+QNWPREFCFG=\"nsa_nr5g_band\";+QNWPREFCFG=\"nr5g_band\"",
+            "response": "AT+QNWPREFCFG=\"lte_band\";+QNWPREFCFG=\"nsa_nr5g_band\";+QNWPREFCFG=\"nr5g_band\"\n+QNWPREFCFG: \"lte_band\",1:2:3:4:5:7:8:12:13:14:17:18:19:20:25:26:28:29:30:32:34:38:39:40:41:42:43:46:48:53:66:70:71\n\n+QNWPREFCFG: \"nsa_nr5g_band\",1:2:3:5:7:8:12:13:14:18:20:25:26:28:29:30:38:40:41:48:53:66:70:71:75:76:77:78:79:92:94:257:258:259:260:261\n\n+QNWPREFCFG: \"nr5g_band\",1:2:3:5:7:8:12:14:20:25:26:28:30:38:40:41:48:71:75:77:78:79:92:257:258:259:260:261\n",
+            "status": "success"
+        }
+    ],
+    "set8": [
+        {
+            "command": "AT+QNWLOCK=\"common/4g\"",
+            "response": "AT+QNWLOCK=\"common/4g\"\n+QNWLOCK: \"common/4g\",0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWLOCK=\"common/5g\"",
+            "response": "AT+QNWLOCK=\"common/5g\"\n+QNWLOCK: \"common/5g\",0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWLOCK=\"save_ctrl\"",
+            "response": "AT+QNWLOCK=\"save_ctrl\"\n+QNWLOCK: \"save_ctrl\",0,1\n",
+            "status": "success"
+        }
+    ],
+    "set9": [
+        {
+            "command": "AT+QUIMSLOT?",
+            "response": "AT+QUIMSLOT?\n+QUIMSLOT: 1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CNUM",
+            "response": "AT+CNUM\n+CNUM: ,\"14023017075\",129\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+COPS?",
+            "response": "AT+COPS?\n+COPS: 0,0,\"T-Mobile\",11\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CIMI",
+            "response": "AT+CIMI\n310260485954539\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+ICCID",
+            "response": "AT+ICCID\n+ICCID: 8901260487759545390F\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGSN",
+            "response": "AT+CGSN\n350596531481979\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CPIN?",
+            "response": "AT+CPIN?\n+CPIN: READY\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGDCONT?",
+            "response": "AT+CGDCONT?\n+CGDCONT: 1,\"IPV4V6\",\"fbb.home\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 2,\"IPV4V6\",\"ims\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,0,,,,,,,,,,\"\",,,,0\n+CGDCONT: 3,\"IPV4V6\",\"sos\",\"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\",0,0,0,1,,,,,,,,,,\"\",,,,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CREG?",
+            "response": "AT+CREG?\n+CREG: 0,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CFUN?",
+            "response": "AT+CFUN?\n+CFUN: 1\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QENG=\"servingcell\"",
+            "response": "AT+QENG=\"servingcell\"\n+QENG: \"servingcell\",\"NOCONN\",\"NR5G-SA\",\"TDD\",310,260,105FB012D,153,A80000,501390,41,12,-77,-10,25,1,-\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QTEMP",
+            "response": "AT+QTEMP\n+QTEMP: \"sdr0\",\"35\"\n+QTEMP: \"mmw0\",\"-273\"\n+QTEMP: \"aoss-0\",\"37\"\n+QTEMP: \"cpuss-0\",\"40\"\n+QTEMP: \"cpuss-1\",\"40\"\n+QTEMP: \"cpuss-2\",\"40\"\n+QTEMP: \"cpuss-3\",\"40\"\n+QTEMP: \"ethphy-0\",\"39\"\n+QTEMP: \"mvmss-0\",\"38\"\n+QTEMP: \"mdmq6-0\",\"38\"\n+QTEMP: \"ctile\",\"37\"\n+QTEMP: \"mdmss-0\",\"37\"\n+QTEMP: \"mdmss-1\",\"37\"\n+QTEMP: \"mdmss-2\",\"38\"\n+QTEMP: \"sys-therm-1\",\"35\"\n+QTEMP: \"sys-therm-2\",\"-40\"\n+QTEMP: \"sys-therm-4\",\"36\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGCONTRDP",
+            "response": "AT+CGCONTRDP\n+CGCONTRDP: 1,4,\"fbb.home\",\"38.7.251.144.44.169.21.31.10.210.110.87.100.94.204.156\", \"254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QCAINFO=1;+QCAINFO;+QCAINFO=0",
+            "response": "AT+QCAINFO=1;+QCAINFO;+QCAINFO=0\n+QCAINFO: \"PCC\",501390,12,\"NR5G BAND 41\",153,-75,-11,2730\n+QCAINFO: \"SCC\",393850,3,\"NR5G BAND 25\",1,696,0,-,-,-97,-12,427\n+QCAINFO: \"SCC\",521310,11,\"NR5G BAND 41\",1,153,0,-,-,-79,-11,-32768\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QRSRP",
+            "response": "AT+QRSRP\n+QRSRP: -77,-77,-140,-140,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QMAP=\"WWAN\"",
+            "response": "AT+QMAP=\"WWAN\"\n+QMAP: \"WWAN\",1,1,\"IPV4\",\"192.0.0.2\"\n+QMAP: \"WWAN\",1,1,\"IPV6\",\"2607:fb90:2ca9:151f:2507:4e2e:8911:53e3\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+C5GREG=2;+C5GREG?",
+            "response": "AT+C5GREG=2;+C5GREG?\n+C5GREG: 2,1,\"A80000\",\"105FB012D\",11,1,\"01\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGREG=2;+CGREG?",
+            "response": "AT+CGREG=2;+CGREG?\n+CGREG: 2,0\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QRSRQ",
+            "response": "AT+QRSRQ\n+QRSRQ: -10,-10,-32768,-32768,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QSINR",
+            "response": "AT+QSINR\n+QSINR: 25,23,-32768,-32768,NR5G\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+CGCONTRDP",
+            "response": "AT+CGCONTRDP\n+CGCONTRDP: 1,4,\"fbb.home\",\"38.7.251.144.44.169.21.31.10.210.110.87.100.94.204.156\", \"254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9\", \"253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16\"\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"lte_time_advance\",1;+QNWCFG=\"lte_time_advance\"",
+            "response": "AT+QNWCFG=\"lte_time_advance\",1;+QNWCFG=\"lte_time_advance\"\n+QNWCFG: \"lte_time_advance\",1,92\n",
+            "status": "success"
+        },
+        {
+            "command": "AT+QNWCFG=\"nr5g_time_advance\",1;+QNWCFG=\"nr5g_time_advance\"",
+            "response": "AT+QNWCFG=\"nr5g_time_advance\",1;+QNWCFG=\"nr5g_time_advance\"\n+QNWCFG: \"nr5g_time_advance\",1,94720,39936\n",
+            "status": "success"
+        }
+    ]
+}

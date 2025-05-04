@@ -13,14 +13,12 @@ export interface QNWCFG3GPP extends QNWCFGBASE {
     rel2: string | number;
 }
 
-// TODO: reevaluate this to ensure all "parameters are valid"
 export const qnwcfg = (data: ResponseData): QNWCFGTA | QNWCFG3GPP => {
     return data.response.split('\n')
         .map(line => line.trim())
         .filter(line => line.startsWith('+QNWCFG:'))
         .map(line => {
             const [parameter, ...rest] = line.split(":")[1].split(",");
-            // const match = line.match(/\+QNWCFG: "([^"]+)",(\d+),?(\d+)?,?(\d+)?/);
             if (parameter.trim().replace(/"/g, "") === "3gpp_rel") {
                 const [rel1, rel2] = rest.map(item => item.trim().replace(/"/g, ""));
                 return {

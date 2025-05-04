@@ -47,6 +47,7 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                {/* This needs to have a coloring for light mode and dark mode that don't conflict with the light or dark backgrounds */}
                 <Button
                   variant="link"
                   type="button"

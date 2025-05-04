@@ -5,6 +5,8 @@ export interface QTEMP {
     temp: number;
 }
 
+// reformat this to put like keys into array...?
+
 export const qtemp = (data: ResponseData): QTEMP[] => {
     if (!data || !data.response) return [];
     return data.response

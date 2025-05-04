@@ -1,25 +1,30 @@
-import {cgcontrdp} from "@/at_responses/cgcontrdp";
-import {cgdcont} from "@/at_responses/cgdcont";
-import {qnwcfg} from "@/at_responses/qnwcfg";
-import {qscan} from "@/at_responses/qscan";
-import {qsinr} from "@/at_responses/qsinr";
-import {qrsrp} from "@/at_responses/qrsrp";
-import {qrsrq} from "@/at_responses/qrsrq";
-import {cgsn} from "@/at_responses/cgsn";
-import {cgreg} from "@/at_responses/cgreg";
-import {creg} from "@/at_responses/creg";
-import {c5greg} from "@/at_responses/c5greg";
-import {cfun} from "@/at_responses/cfun";
-import {qeng} from "@/at_responses/qeng";
-import {qcainfo} from "@/at_responses/qcainfo";
-import {qmap} from "@/at_responses/qmap";
-import {qtemp} from "@/at_responses/qtemp";
-import {quimslot} from "@/at_responses/quimslot";
-import {cimi} from "@/at_responses/cimi";
-import {cnum} from "@/at_responses/cnum";
-import {cops} from "@/at_responses/cops";
-import {cpin} from "@/at_responses/cpin";
-import {iccid} from "@/at_responses/iccid";
+import { ResponseData } from "@/types/types";
+import { qcapability }  from "@/at_responses/qgetcapability";
+import { cgcontrdp }    from "@/at_responses/cgcontrdp";
+import { quimslot }     from "@/at_responses/quimslot";
+import { qcainfo }      from "@/at_responses/qcainfo";
+import { cgdcont }      from "@/at_responses/cgdcont";
+import { c5greg }       from "@/at_responses/c5greg";
+import { qnwcfg }       from "@/at_responses/qnwcfg";
+import { cgreg }        from "@/at_responses/cgreg";
+import { qscan }        from "@/at_responses/qscan";
+import { qsinr }        from "@/at_responses/qsinr";
+import { qrsrp }        from "@/at_responses/qrsrp";
+import { qrsrq }        from "@/at_responses/qrsrq";
+import { qtemp }        from "@/at_responses/qtemp";
+import { iccid }        from "@/at_responses/iccid";
+import { cgsn }         from "@/at_responses/cgsn";
+import { creg }         from "@/at_responses/creg";
+import { cfun }         from "@/at_responses/cfun";
+import { qeng }         from "@/at_responses/qeng";
+import { qmap }         from "@/at_responses/qmap";
+import { cimi }         from "@/at_responses/cimi";
+import { cnum }         from "@/at_responses/cnum";
+import { cops }         from "@/at_responses/cops";
+import { cpin }         from "@/at_responses/cpin";
+import { qgmr }         from "@/at_responses/qgmr";
+import { cgmm }         from "@/at_responses/cgmm";
+import { cgmi }         from "@/at_responses/cgmi";
 
 const atResponses = {
   cgcontrdp,
@@ -44,8 +49,11 @@ const atResponses = {
   cops,
   cpin,
   iccid,
+  qcapability,
+  qgmr,
+  cgmm,
+  cgmi,
 };
-import { ResponseData } from "@/types/types";
 
   const commandMap: Record<string, keyof typeof atResponses> = {
     "AT+CGCONTRDP": "cgcontrdp",
@@ -70,6 +78,10 @@ import { ResponseData } from "@/types/types";
     "AT+COPS": "cops",
     "AT+CPIN": "cpin",
     "AT+ICCID": "iccid",
+    "AT+QGETCAPABILITY": "qcapability",
+    "AT+QGMR": "qgmr",
+    "AT+CGMM": "cgmm",
+    "AT+CGMI": "cgmi",
   };
 // Utility function to map commands to parsers
 const getParser = (command: string): ((data: ResponseData) => any) | null => {
