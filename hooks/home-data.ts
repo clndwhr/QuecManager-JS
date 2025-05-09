@@ -122,20 +122,28 @@ const useHomeData = () => {
 
   const fetchHomeData = useCallback(async () => {
     try {
-      const response = await fetch(
-        "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=1"
-      );
-      if (!response.ok) {
-        throw new Error(`API returned status ${response.status}`);
-      }
-
-      const rawData = await response.json();
-      console.log(rawData); //
-
       // fetch public ip from /cgi-bin/quecmanager/home/fetch_public_ip.sh
       const publicIPResponse = await fetch(
         "/cgi-bin/quecmanager/home/fetch_public_ip.sh"
       );
+      const platform = sessionStorage.getItem("platform");
+      let url = "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=1";
+      let atcmd = "";
+      if (platform?.includes("LEMUR")) {
+        atcmd = 'AT+QUIMSLOT?;+CNUM;+COPS?;+CIMI;+ICCID;+CGSN;+CPIN?;+CGDCONT?;+CREG?;+CFUN?;+QENG="servingcell";+QTEMP;+CGCONTRDP;+QCAINFO;+QRSRP;+QMAP="WWAN";+C5GREG=2;+C5GREG?;+CGREG=2;+CGREG?;+QRSRQ;+QSINR';
+        // atcmd = 'ATI;+QUIMSLOT?;+CNUM;+COPS?;+ICCID;+CPIN?;+CGDCONT?;+CREG?;+CFUN?;+QENG="servingcell";+QTEMP;+CGCONTRDP;+QCAINFO;+QRSRP;+QMAP="WWAN";+C5GREG=2;+C5GREG?;+CGREG=2;+CGREG?;+QRSRQ;+QSINR';
+        // CIMI and CGSN do not return with their key prepended to the value like the rest
+        url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" +
+          new URLSearchParams({atcmd: atcmd});
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`API returned status ${response.status}`);
+      }
+      const rawData = platform?.includes("LEMUR") ? convertResponse(atcmd, await response.text()) : await response.json();
+      console.log(rawData); //
+
+
 
       // Process the raw data into the HomeData format
       const processedData: HomeData = {
@@ -685,4 +693,83 @@ const formatDottedIPv6 = (dottedIPv6: string): string => {
   }
 };
 
+const convertResponse = (commands: string, response: string): { command: string; response: string; status: string }[] => {
+  const returnJSON: { command: string; response: string; status: string }[] = [];
+  const responseArr = response.replace('\r',"").split("\n").filter((line) => line.trim() !== "" && !line.startsWith("AT+"));
+  commands.split(";").forEach((command, index) => {
+    const localCommand = command.replaceAll("?", "").replace("AT+", "+").trim();
+    const resps = responseArr.filter((line) => line.startsWith(localCommand.trim())).map(x => x.replaceAll('\r','').trim());
+    const status = response.includes("OK") ? "success" : "error";
+    const localObj = { command, status, response: `AT${resps.join('\n')}` };
+    returnJSON.push(localObj);
+  });
+
+  return returnJSON;
+}
+
 export default useHomeData;
+
+
+
+// AT+QUIMSLOT?;+CNUM;+COPS?;+CIMI;+ICCID;+CGSN;+CPIN?;+CGDCONT?;+CREG?;+CFUN?;+QENG="servingcell";+QTEMP;+CGCONTRDP;+QCAINFO;+QRSRP;+QMAP="WWAN";+C5GREG=2;+C5GREG?;+CGREG=2;+CGREG?;+QRSRQ;+QSINR
+
+// +QUIMSLOT: 1
+
+// +CNUM: ,"18596469319",129
+
+// +COPS: 0,0,"T-Mobile",11
+
+// 310260414166588
+
+// +ICCID: 8901260418741665889F
+
+// 868371054280009
+
+// +CPIN: READY
+
+// +CGDCONT: 1,"IPV4V6","","0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0",0,0,0,0,,,,,,,,,,"",,,,0
+// +CGDCONT: 2,"IPV4V6","ims","0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0",0,0,0,0,,,,,,,,,,"",,,,0
+// +CGDCONT: 3,"IPV4V6","sos","0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0",0,0,0,1,,,,,,,,,,"",,,,0
+
+// +CREG: 0,0
+
+// +CFUN: 1
+
+// +QENG: "servingcell","NOCONN","NR5G-SA","FDD",310,260,105FB0001,656,A80000,126270,71,2,-103,-11,9,0,-
+
+// +QTEMP:"modem-lte-sub6-pa1","26"
+// +QTEMP:"modem-sdr0-pa0","0"
+// +QTEMP:"modem-sdr0-pa1","0"
+// +QTEMP:"modem-sdr0-pa2","0"
+// +QTEMP:"modem-sdr1-pa0","0"
+// +QTEMP:"modem-sdr1-pa1","0"
+// +QTEMP:"modem-sdr1-pa2","0"
+// +QTEMP:"modem-mmw0","0"
+// +QTEMP:"aoss-0-usr","31"
+// +QTEMP:"cpuss-0-usr","30"
+// +QTEMP:"mdmq6-0-usr","30"
+// +QTEMP:"mdmss-0-usr","31"
+// +QTEMP:"mdmss-1-usr","29"
+// +QTEMP:"mdmss-2-usr","29"
+// +QTEMP:"mdmss-3-usr","29"
+// +QTEMP:"modem-lte-sub6-pa2","26"
+// +QTEMP:"modem-ambient-usr","27"
+
+// +CGCONTRDP: 1,0,"fast.t-mobile.com","38.7.251.144.44.21.132.193.10.210.110.81.101.111.94.145", "254.128.0.0.0.0.0.0.180.109.87.255.254.69.69.69", "253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.9", "253.0.151.106.0.0.0.0.0.0.0.0.0.0.0.16"
+
+// +QCAINFO: "PCC",126270,2,"NR5G BAND 71",656,-104,-12,-435
+
+// +QRSRP: -117,-103,-32768,-32768,NR5G
+
+// +QMAP: "WWAN",1,1,"IPV4","192.0.0.2"
+// +QMAP: "WWAN",1,1,"IPV6","2607:fb90:2c15:84c1:1560:d8c8:e28c:8e9f"
+
+// +C5GREG: 2,1,"A80000","105FB0001",11,1,"01"
+
+// +CGREG: 2,0
+
+// +QRSRQ: -17,-11,-32768,-32768,NR5G
+
+// +QSINR: -1,9,-32768,-32768,NR5G
+
+// OK

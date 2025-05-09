@@ -85,6 +85,7 @@ export function useAuth() {
       }
 
       const result = await response.json();
+      sessionStorage.setItem("platform", result?.platform);
       if (!result.alive) {
         handleServerDown();
       } else {
