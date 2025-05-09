@@ -6,5 +6,7 @@ echo "Pragma: no-cache"
 echo "Expires: 0"
 echo ""
 
+PLATFORM=$(cat /sys/devices/soc0/machine)
+
 # Basic response indicating the server is up
-echo '{"alive": true}'
+echo "{\"alive\": true, \"platform\": \"$PLATFORM\"}"
