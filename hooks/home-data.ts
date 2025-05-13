@@ -692,6 +692,7 @@ const formatDottedIPv6 = (dottedIPv6: string): string => {
   }
 };
 
+// Convert the response from get_atcommand.sh to the expected structure as provided from fetch_data.sh?set=1
 const convertResponse = (commands: string, response: string): { command: string; response: string; status: string }[] => {
   const returnJSON: { command: string; response: string; status: string }[] = [];
   const responseArr = response.replace('\r', "").split("\n").filter((line) => line.trim() !== "" && !line.startsWith("AT+"));
