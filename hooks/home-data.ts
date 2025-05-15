@@ -130,8 +130,9 @@ const useHomeData = () => {
       let url = "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=1";
       let atcmd = "";
       if (platform?.includes("LEMUR")) {
-        // need to send +C5GREG=2;+CGREG=2;
-        atcmd = 'AT+QUIMSLOT?;+CNUM;+COPS?;+CIMI;+ICCID;+CGSN;+CPIN?;+CGDCONT?;+CREG?;+CFUN?;+QENG="servingcell";+QTEMP;+CGCONTRDP;+QCAINFO;+QRSRP;+QMAP="WWAN";+C5GREG?;+CGREG?;+QRSRQ;+QSINR';
+        const uri = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" + new URLSearchParams({ atcmd: 'AT+C5GREG=2;+CGREG=2;+QNWCFG="lte_time_advance",1;+QNWCFG="nr5g_time_advance",1' });
+        await fetch(uri);
+        atcmd = 'AT+QUIMSLOT?;+CNUM;+COPS?;+CIMI;+ICCID;+CGSN;+CPIN?;+CGDCONT?;+CREG?;+CFUN?;+QENG="servingcell";+QTEMP;+CGCONTRDP;+QCAINFO;+QRSRP;+QMAP="WWAN";+C5GREG?;+CGREG?;+QRSRQ;+QSINR;+QNWCFG="lte_time_advance";+QNWCFG="nr5g_time_advance";+QGDCNT?;+QGDNRCNT?';
         url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" +
         new URLSearchParams({atcmd: atcmd});
       }
@@ -141,8 +142,6 @@ const useHomeData = () => {
       }
       const rawData = platform?.includes("LEMUR") ? convertResponse(atcmd, await response.text()) : await response.json();
       console.log(rawData); //
-
-
 
       // Process the raw data into the HomeData format
       const processedData: HomeData = {
@@ -372,7 +371,9 @@ const getNetworkType = (response: string) => {
 };
 
 const getModemTemperature = (response: string) => {
-  const temps = ["cpuss-0", "cpuss-1", "cpuss-2", "cpuss-3"].map((cpu) => {
+  const platform = sessionStorage.getItem("platform");
+  const tempArrs = platform?.includes('LEMUR') ? ["cpuss-0-usr"] : ["cpuss-0", "cpuss-1", "cpuss-2", "cpuss-3"];
+  const temps = tempArrs.map((cpu) => {
     const line = response.split("\n").find((l) => l.includes(cpu));
     return parseInt(line!?.split(":")[1]?.split(",")[1].replace(/"/g, "").trim());
   });
@@ -702,11 +703,57 @@ const convertResponse = (commands: string, response: string): { command: string;
     const localCommand = command.replaceAll("?", "").split("=")[0].replace("AT+", "+").trim();
     const resps = responseArr.filter((line) => line.startsWith(localCommand.trim())).map(x => x.replaceAll('\r','').trim());
     const status = response.includes("OK") ? "success" : "error";
-    const localResp = command.includes('CIMI') || command.includes('CGSN') ? `${resps.join('\n').replace(':', '\n')}\n` : `AT${command}\nAT${resps.join('\n')}\n`
+    const localResp = command.includes('CIMI') || command.includes('CGSN') ? `${resps.join('\n').replace(':', '\n')}\n` : command.startsWith('AT') ? `${command}\nAT${resps.join('\n')}\n` : `AT${command}\nAT${resps.join('\n')}\n`;
     const localObj = { command, status, response: localResp };
     returnJSON.push(localObj);
   });
+  returnJSON[22] = returnJSON[21]; // +QENG="servingcell" for NR5G-NSA
+  returnJSON[21] = returnJSON[20]; // +QENG="servingcell" for LTE
+  returnJSON[20] = returnJSON[12]; // +CGDCONTRDP for DNS
 
+  const sessSigRsrpInfo = sessionStorage.getItem("SIGNAL_INFO_RSRP");
+  const sessSigRsrqInfo = sessionStorage.getItem("SIGNAL_INFO_RSRQ");
+  const sessSigSinrInfo = sessionStorage.getItem("SIGNAL_INFO_SINR");
+  const now = new Date();
+  let sigRsrpInfoArr = []; 
+  let sigRsrqInfoArr = []; 
+  let sigSinrInfoArr = []; 
+  const newSigRsrpInfoObject = { "datetime": `${new Date(now.getTime()).toISOString()}`, "output": `${returnJSON[14].response?.replaceAll("AT+QRSRP", "").replaceAll(",NR5G", "").replaceAll(",LTE", "").replaceAll("\n: ", "").replaceAll("\n","").replaceAll(",","\n")}` };
+  const newSigRsrqInfoObject = { "datetime": `${new Date(now.getTime()).toISOString()}`, "output": `${returnJSON[18].response?.replaceAll("AT+QRSRQ", "").replaceAll(",NR5G", "").replaceAll(",LTE", "").replaceAll("\n: ", "").replaceAll("\n","").replaceAll(",","\n")}` };
+  const newSigSinrInfoObject = { "datetime": `${new Date(now.getTime()).toISOString()}`, "output": `${returnJSON[19].response?.replaceAll("AT+QSINR", "").replaceAll(",NR5G", "").replaceAll(",LTE", "").replaceAll("\n: ", "").replaceAll("\n","").replaceAll(",","\n")}` };
+  if (!sessSigRsrpInfo) {
+    sigRsrpInfoArr.push(newSigRsrpInfoObject);
+  } else {
+    sigRsrpInfoArr.push(...JSON.parse(sessSigRsrpInfo), newSigRsrpInfoObject);
+    if (sigRsrpInfoArr.length > 10) {
+      sigRsrpInfoArr = sigRsrpInfoArr.slice(sigRsrpInfoArr.length - 10);
+    }
+  }
+  if (!sessSigRsrqInfo) {
+    sigRsrqInfoArr.push(newSigRsrqInfoObject);
+  } else {
+    sigRsrqInfoArr.push(...JSON.parse(sessSigRsrqInfo), newSigRsrqInfoObject);
+    if (sigRsrqInfoArr.length > 10) {
+      sigRsrqInfoArr = sigRsrqInfoArr.slice(sigRsrqInfoArr.length - 10);
+    }
+  }
+  if (!sessSigSinrInfo) {
+    sigSinrInfoArr.push(newSigSinrInfoObject);
+  } else {
+    sigSinrInfoArr.push(...JSON.parse(sessSigSinrInfo), newSigSinrInfoObject);
+    if (sigSinrInfoArr.length > 10) {
+      sigSinrInfoArr = sigSinrInfoArr.slice(sigSinrInfoArr.length - 10);
+    }
+  }
+  sessionStorage.setItem("SIGNAL_INFO_RSRP",JSON.stringify(sigRsrpInfoArr));
+  sessionStorage.setItem("SIGNAL_INFO_RSRQ",JSON.stringify(sigRsrqInfoArr));
+  sessionStorage.setItem("SIGNAL_INFO_SINR",JSON.stringify(sigSinrInfoArr));
+  const dataObj = { rsrp: sigRsrpInfoArr, rsrq: sigRsrqInfoArr, sinr: sigSinrInfoArr };
+  sessionStorage.setItem("SIGNAL_INFO", JSON.stringify(dataObj));
+
+  // Store data from the get_atcommand call to use in home-traffic.ts
+  sessionStorage.setItem("QGDNRCNT", returnJSON[23]?.response.split("\n")[1]?.replace("AT+QGDNRCNT: ", "") || "0,0");
+  sessionStorage.setItem("QGDCNT", returnJSON[24]?.response.split("\n")[1]?.replace("AT+QGDCNT: ", "") || "0,0");
   return returnJSON;
 }
 

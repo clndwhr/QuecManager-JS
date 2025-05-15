@@ -71,9 +71,24 @@ const useTrafficStats = () => {
 
   const fetchTrafficStats = useCallback(async () => {
     try {
-      const response = await fetch("/cgi-bin/quecmanager/home/fetch_data_usage.sh");
-      const data = await response.json();
-      parseTrafficData(data);
+      let url = "/cgi-bin/quecmanager/home/fetch_data_usage.sh";
+      let atcmd = "";
+      const platform = sessionStorage.getItem("platform") || "SDXPINN";
+      if (platform?.includes("LEMUR")) {
+        const QGDNRCNT = sessionStorage.getItem("QGDNRCNT") || "0,0";
+        const QGDCNT = sessionStorage.getItem("QGDCNT") || "0,0";        
+        const data = {
+          datetime: new Date().toISOString(),
+          output: `AT+QGDCNT?;+QGDNRCNT?;\n+QGDCNT: ${QGDCNT}\n\n+QGDNRCNT: ${QGDNRCNT}\n`
+        };
+        console.log("Traffic stats response:", data);
+        parseTrafficData(data);
+      } else {
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log("Traffic stats response:", data);
+        parseTrafficData(data);
+      }
     } catch (error) {
       console.error("Error fetching traffic stats:", error);
     }

@@ -63,7 +63,6 @@ const chartConfig = {
 const parseSignalOutput = (output: string): number => {
   // Split the output into LTE and NR5G parts if they exist
   const parts = output.split("\n").filter((part) => part.trim());
-
   // Extract all numbers from both LTE and NR5G readings
   const allNumbers: number[] = [];
 
@@ -81,7 +80,6 @@ const parseSignalOutput = (output: string): number => {
 
   // Return 0 if no valid numbers after filtering
   if (validNumbers.length === 0) return 0;
-
   // Calculate average of remaining numbers
   const sum = validNumbers.reduce((acc, curr) => acc + curr, 0);
   return Math.round(sum / validNumbers.length);
@@ -105,20 +103,27 @@ const SignalChart = () => {
 
   const fetchSignalMetrics = useCallback(async () => {
     try {
-      const response = await fetch(
-        "/cgi-bin/quecmanager/home/fetch_signal_metrics.sh"
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch signal metrics");
-      }
-
+      const platform = sessionStorage.getItem("platform") || "SDXPINN";
       let data: SignalResponse;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error("Error parsing JSON:", jsonError);
-        throw new Error("Failed to parse signal metrics data");
+      if (platform === "SDXPINN") {
+        const response = await fetch(
+          "/cgi-bin/quecmanager/home/fetch_signal_metrics.sh"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch signal metrics");
+        }
+
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error("Error parsing JSON:", jsonError);
+          throw new Error("Failed to parse signal metrics data");
+        }
+      } else {
+        data = sessionStorage.getItem("SIGNAL_INFO")
+          ? JSON.parse(sessionStorage.getItem("SIGNAL_INFO") || "{ rsrp: [], rsrq: [], sinr: [] }")
+          : { rsrp: [], rsrq: [], sinr: [] };
       }
 
       // Ensure all arrays have the same length
@@ -127,7 +132,6 @@ const SignalChart = () => {
         data.rsrq.length,
         data.sinr.length
       );
-
       if (length === 0) {
         throw new Error("No signal metrics data available");
       }
