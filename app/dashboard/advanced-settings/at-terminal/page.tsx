@@ -187,9 +187,9 @@ const ATTerminalPage = () => {
 
   const executeCommand = async () => {
     const command = input.trim();
-
+    const platform = sessionStorage.getItem("platform");
     // Easter egg check
-    if (command.toLowerCase() === "tetris") {
+    if (command.toLowerCase() === "tetris" && platform?.includes("PINN")) {
       window.open(
         "/utils/dsMDh6647ZGkOLyv60QE/OGwW8ufEw6nWPQSaliNX/games/tetris",
         "_blank"
@@ -223,10 +223,13 @@ const ATTerminalPage = () => {
         const executePreviousCommand = async () => {
           try {
             const encodedCommand = encodeURIComponent(previousCommand);
-            const response = await fetch(
-              `/cgi-bin/quecmanager/at_cmd/at_queue_client.sh?command=${encodedCommand}&wait=1`
-            );
-            const data: QueueResponse = await response.json();
+            let url = `/cgi-bin/quecmanager/at_cmd/at_queue_client.sh?command=${encodedCommand}&wait=1`;
+            if (platform?.includes("LEMUR")) {
+              url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" + new URLSearchParams({atcmd: encodedCommand});
+            }
+            const response = await fetch(url);
+
+            const data: QueueResponse = platform?.includes("LEMUR") ? formatATResponse(command, await response.text()) : await response.json();
 
             // Format output
             let outputText = `> ${previousCommand}\n`;
@@ -308,11 +311,12 @@ const ATTerminalPage = () => {
     try {
       // Send command to queue client with wait flag
       const encodedCommand = encodeURIComponent(command);
-      const response = await fetch(
-        `/cgi-bin/quecmanager/at_cmd/at_queue_client.sh?command=${encodedCommand}&wait=1`
-      );
-      const data: QueueResponse = await response.json();
-
+      let url = `/cgi-bin/quecmanager/at_cmd/at_queue_client.sh?command=${encodedCommand}&wait=1`
+      if (platform?.includes("LEMUR")) {
+        url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" + new URLSearchParams({atcmd: encodedCommand});
+      }
+      const response = await fetch(url);
+      const data: QueueResponse = platform?.includes("LEMUR") ? formatATResponse(command, await response.text()) : await response.json();
       // Format output
       let outputText = `> ${command}\n`;
       if (data.response.raw_output) {
@@ -369,6 +373,37 @@ const ATTerminalPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatATResponse = (
+    command: string,
+    rawOutput: string,
+    options?: {
+      id?: string;
+      timestamp?: string;
+      completion_time?: string;
+      duration_ms?: number;
+    }
+  ) => {
+    // Generate fallback values if not provided
+    const now = new Date();
+    const defaultId = `${Math.floor(now.getTime() / 1000)}_${Math.random().toString(16).slice(2, 18)}`;
+    const defaultTimestamp = now.toISOString();
+    const defaultCompletionTime = Math.floor(now.getTime() / 1000).toString();
+
+    return {
+      command: {
+        id: options?.id || defaultId,
+        text: command,
+        timestamp: options?.timestamp || defaultTimestamp,
+      },
+      response: {
+        status: /OK\s*$/m.test(rawOutput) ? "success" : "error",
+        raw_output: rawOutput,
+        completion_time: options?.completion_time || defaultCompletionTime,
+        duration_ms: options?.duration_ms ?? 1,
+      },
+    };
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
