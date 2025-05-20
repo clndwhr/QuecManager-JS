@@ -294,14 +294,26 @@ const ConnectivitySettingsPage = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+
+        let url = "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=4";
+        let atcmd = '';
+        // AT+QMAP="MPDN_RULE" AT+QMAP="DHCPV4DNS" AT+QCFG="usbnet"
+        const platform = sessionStorage.getItem("platform");
+        if (platform?.includes("LEMUR")) {
+          atcmd = 'AT+QMAP="MPDN_rule";+QMAP="DHCPV4DNS";+QCFG="usbnet"';
+          url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" +
+          new URLSearchParams({atcmd: atcmd});
+        }
+
+
         const [macsResponse, advanceResponse] = await Promise.all([
           fetch("/cgi-bin/quecmanager/advance/fetch_macs.sh"),
-          fetch("/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=4"),
+          fetch(url),
         ]);
 
         const [macsData, advanceData] = await Promise.all([
           macsResponse.json(),
-          advanceResponse.json(),
+          platform?.includes("LEMUR") ? convertResponse(atcmd, await advanceResponse.text()) : await advanceResponse.json(),
         ]);
 
         setMacAddresses(macsData);
@@ -494,5 +506,26 @@ const ConnectivitySettingsPage = () => {
     </div>
   );
 };
+const convertResponse = (commands: string, response: string): { command: string; response: string; status: string }[] => {
+  const returnJSON: { command: string; response: string; status: string }[] = [];
+  const responseArr = response.replaceAll('\r', "").split("\n").filter((line) => line.trim() !== "" && !line.startsWith("AT+"));
+  const commandLine = response.replaceAll('\r', "").split("\n").find((line) => line.trim() !== "" && line.startsWith("AT+"));
+  console.log('commandLine', commandLine);
+  commandLine?.split(";").forEach((command, index) => {
+    const localCommand = command.replaceAll("?", "").replaceAll("=", ": ").replaceAll("AT+", "+").trim();
+    console.log('command, localcommand', command, localCommand, responseArr);
+    const resps = responseArr.filter((line) => line.startsWith(localCommand.trim())).map((x) => {
+      console.log('x', x, localCommand);
+      return x.replaceAll('\r','').trim();
+    });
+    const status = response.includes("OK") ? "success" : "error";
+    const localResp = command.startsWith('AT') ? `${command}\nAT${resps.join('\n')}\n` : `AT${command}\nAT${resps.join('\n')}\n`;
+    const localObj = { command: command.startsWith("AT") ? command : `AT${command}`, status, response: localResp };
+    returnJSON.push(localObj);
+  });
+
+
+  return returnJSON;
+}
 
 export default ConnectivitySettingsPage;
