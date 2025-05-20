@@ -154,74 +154,74 @@ const BasicSettings = () => {
   // Fetch active profile information
   useEffect(() => {
     const fetchProfileData = async () => {
-      try {
-        // Fetch active profile status
-        const profileResponse = await fetch(
-          "/cgi-bin/quecmanager/profiles/check_status.sh"
-        );
-        if (!profileResponse.ok) {
-          throw new Error(
-            `Failed to fetch profile status: ${profileResponse.statusText}`
-          );
-        }
-        const profileData = await profileResponse.json();
-        setProfileStatus(profileData);
 
-        // console.log("Profile Status:", profileData);
 
-        // Only proceed if there's an active profile
-        if (
-          profileData.status === "success" &&
-          profileData.profile &&
-          profileData.profile !== "unknown" &&
-          profileData.profile !== "none"
-        ) {
-          // Fetch all profiles to find the active one
-          const profilesResponse = await fetch(
-            "/cgi-bin/quecmanager/profiles/list_profiles.sh"
-          );
-          if (profilesResponse.ok) {
-            const profilesData = await profilesResponse.json();
-            if (
-              profilesData.status === "success" &&
-              Array.isArray(profilesData.profiles)
-            ) {
-              // Find the active profile
-              const active = profilesData.profiles.find(
-                (p: Profile) => p.name === profileData.profile
-              );
-              if (active) {
-                setActiveProfile(active);
+        try {
+          const platform = sessionStorage.getItem("platform");
+          let url = "/cgi-bin/quecmanager/profiles/check_status.sh";
+          const profileResponse = await fetch(url);
+          if (!profileResponse.ok) {
+            throw new Error(`Failed to fetch profile status: ${profileResponse.statusText}`);
+          }
+          const profileData = await profileResponse.json();
+          console.log('profileData', profileData); //
 
-                // Determine which fields are controlled by the profile
-                const controlledFields = {
-                  currentAPN: Boolean(active.apn),
-                  apnPDPType: Boolean(active.pdp_type),
-                  preferredNetworkType: Boolean(active.network_type),
-                  nr5gMode: Boolean(
-                    active.sa_nr5g_bands || active.nsa_nr5g_bands
-                  ),
-                };
+          setProfileStatus(profileData);
 
-                setProfileControlledFields(controlledFields);
+          // Only proceed if there's an active profile
+          if (
+            profileData.status === "success" &&
+            profileData.profile &&
+            profileData.profile !== "unknown" &&
+            profileData.profile !== "none"
+          ) {
+            // Fetch all profiles to find the active one
+            const profilesResponse = await fetch(
+              "/cgi-bin/quecmanager/profiles/list_profiles.sh"
+            );
+            if (profilesResponse.ok) {
+              const profilesData = await profilesResponse.json();
+              if (
+                profilesData.status === "success" &&
+                Array.isArray(profilesData.profiles)
+              ) {
+                // Find the active profile
+                const active = profilesData.profiles.find(
+                  (p: Profile) => p.name === profileData.profile
+                );
+                if (active) {
+                  setActiveProfile(active);
 
-                // console.log("Active Profile:", active);
-                // console.log("Controlled Fields:", controlledFields);
+                  // Determine which fields are controlled by the profile
+                  const controlledFields = {
+                    currentAPN: Boolean(active.apn),
+                    apnPDPType: Boolean(active.pdp_type),
+                    preferredNetworkType: Boolean(active.network_type),
+                    nr5gMode: Boolean(
+                      active.sa_nr5g_bands || active.nsa_nr5g_bands
+                    ),
+                  };
+
+                  setProfileControlledFields(controlledFields);
+
+                  // console.log("Active Profile:", active);
+                  // console.log("Controlled Fields:", controlledFields);
+                }
               }
             }
+          } else {
+            setActiveProfile(null);
+            setProfileControlledFields({
+              currentAPN: false,
+              apnPDPType: false,
+              preferredNetworkType: false,
+              nr5gMode: false,
+            });
           }
-        } else {
-          setActiveProfile(null);
-          setProfileControlledFields({
-            currentAPN: false,
-            apnPDPType: false,
-            preferredNetworkType: false,
-            nr5gMode: false,
-          });
+      
+        } catch (err) {
+          console.error("Error fetching profile data:", err);
         }
-      } catch (err) {
-        console.error("Error fetching profile data:", err);
-      }
     };
 
     fetchProfileData();
@@ -1011,5 +1011,61 @@ const BasicSettings = () => {
     </div>
   );
 };
+// Convert the response from get_atcommand.sh to the expected structure as provided from fetch_data.sh?set=1
+const convertResponse = (
+  commands: string,
+  response: string
+): { command: string; response: string; status: string }[] => {
+  // Split commands and responses into arrays
+  const commandList = commands
+    .split(";")
+    .map((cmd) => cmd.trim())
+    .filter(Boolean);
 
+  const responseLines = response
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  // For each command, collect its matching response lines
+  const results: { command: string; response: string; status: string }[] = [];
+
+  for (const cmd of commandList) {
+    // Build a regex to match the response lines for this command
+    // For example, AT+QNWPREFCFG="mode_pref" -> /^\+QNWPREFCFG: "mode_pref"/
+    let keyRegex: RegExp;
+    if (/^AT\+QNWPREFCFG=/.test(cmd)) {
+      const param = cmd.match(/^AT\+QNWPREFCFG=(.*)$/)?.[1];
+      keyRegex = new RegExp(`^\\+QNWPREFCFG: ${param?.replace(/"/g, '\\"')}`);
+    } else if (/^AT\+CGDCONT\?/.test(cmd)) {
+      keyRegex = /^\+CGDCONT:/;
+    } else if (/^AT\+ICCID/.test(cmd)) {
+      keyRegex = /^\+ICCID:/;
+    } else if (/^AT\+CGSN/.test(cmd)) {
+      keyRegex = /^\d{15,}$/; // IMEI is usually a 15-digit number
+    } else {
+      // Generic: match +COMMAND:
+      const key = cmd.replace(/^AT\+/, "+").replace(/\?.*$/, "?").replace(/=.*/, "");
+      keyRegex = new RegExp(`^\\${key}`);
+    }
+
+    // Find all response lines that match this command
+    const matchingLines = responseLines.filter((line) => keyRegex.test(line));
+
+    // If no matching lines, skip this command
+    if (matchingLines.length === 0) continue;
+
+    // Compose the response: AT+CMD\n+RESPONSE1\n+RESPONSE2...
+    const resp = `${cmd}\n${matchingLines.join("\n")}\n`;
+
+    results.push({
+      command: cmd,
+      response: resp,
+      status: response.includes("OK") ? "success" : "error",
+    });
+  }
+
+  return results;
+};
 export default BasicSettings;

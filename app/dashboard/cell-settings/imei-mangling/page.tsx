@@ -59,10 +59,21 @@ const IMEIManglingPage = () => {
   const fetchIMEI = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=3"
-      );
-      const rawData = await response.json();
+
+      const platform = sessionStorage.getItem("platform");
+      let url = "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=3";
+      let atcmd = "";
+      if (platform?.includes("LEMUR")) {
+        // 'AT+CGMI;+CGMM;+QGMR;+CNUM;+CIMI;+ICCID;+CGSN;+QMAP="LANIP";+QMAP="WWAN";+QGETCAPABILITY;+QNWCFG="3gpp_rel"'
+        atcmd = 'AT+CGMI;+CGMM;+QGMR;+CNUM;+CIMI;+ICCID;+CGSN;+QMAP="LANIP";+QMAP="WWAN";+QGETCAPABILITY;+QNWCFG="3gpp_rel"';
+        url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" + new URLSearchParams({atcmd: atcmd});
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const rawData = platform?.includes("LEMUR") ? convertResponse(await response.text()) : await response.json();
 
       console.log(rawData);
       // Use the 6th index to get the IMEI
@@ -310,5 +321,40 @@ const IMEIManglingPage = () => {
     </div>
   );
 };
+const convertResponse = (
+  response: string
+): { command: string; response: string; status: string }[] => {
 
+  const responseLs = response
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((line) => line.trimEnd()).filter(l => l.trim() !== "");
+  
+  const [commandLine, ...lines] = responseLs;
+  lines[0] = `AT+CGMI: ${lines[0]}`;
+  lines[1] = `+CGMM: ${lines[1]}`;
+  lines[2] = `+QGMR: ${lines[2]}`;
+  lines[4] = `+CIMI: ${lines[4]}`;
+  lines[6] = `+CGSN: ${lines[6]}`;
+  // Compose output
+  const result: { command: string; response: string; status: string }[] = [];
+  const commandLines = commandLine.split(';').map(cmd => cmd.trim()).filter(cmd => cmd.trim() !== "");
+  for (const cmd of commandLines) {
+    console.log('cmd', cmd);
+    // console.log('lines', lines);
+    const resp = lines.filter((l) => l.startsWith(cmd)).map(l => {
+      if (l.startsWith("AT+CGMI:") || l.startsWith("+CGMM:") || l.startsWith("+QGMR:") || l.startsWith("+CIMI:") || l.startsWith("+CGSN:")) {
+        console.log('l', l);
+        return l.replace(/^AT\+CGMI: /, "").replace(/^\+CGMM: /, "").replace(/^\+QGMR: /, "").replace(/^\+CIMI: /, "").replace(/^\+CGSN: /, "");
+      }
+      return `AT${l}`;
+    }).join("\n");
+    result.push({
+      command: cmd.startsWith("AT") ? cmd : `AT${cmd}`,
+      response: cmd.startsWith("AT") ? `${cmd}\n${resp}\n` : `AT${cmd}\n${resp}\n`,
+      status: lines.some((l) => l.trim() === "OK") ? "success" : "error",
+    });
+  }
+  return result;
+};
 export default IMEIManglingPage;

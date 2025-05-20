@@ -1038,7 +1038,7 @@ main() {
         while [ $sleep_counter -lt $check_interval ]; do
             sleep 5
             sleep_counter=$((sleep_counter + 5))
-            
+
             # Check for manual trigger during sleep
             if [ -f "$CHECK_TRIGGER" ]; then
                 log_message "Manual check triggered during sleep" "info"

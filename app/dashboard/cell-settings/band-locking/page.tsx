@@ -16,7 +16,7 @@ import { LockIcon, RefreshCw, AlertCircle } from "lucide-react";
 import { atCommandSender } from "@/utils/at-command"; // Import from utils
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-type BandType = "lte" | "nsa" | "sa";
+type BandType = "lte" | "nsa" | "sa" | "legacy_sa"; // added legacy_sa for non 551/550 devices
 
 interface BandState {
   lte: number[];
@@ -69,12 +69,14 @@ const supportedCommandMap: Record<BandType, string> = {
   lte: "lte_band",
   nsa: "nsa_nr5g_band",
   sa: "nrdc_nr5g_band", // Use nrdc_nr5g_band for supported SA bands
+  legacy_sa: "nr5g_band", // Use nrdc_nr5g_band for supported SA bands, added legacy_sa for non 551/550 devices
 };
 
 const activeCommandMap: Record<BandType, string> = {
   lte: "lte_band",
   nsa: "nsa_nr5g_band",
   sa: "nr5g_band", // Keep nr5g_band for active SA bands
+  legacy_sa: "nr5g_band", // Keep nr5g_band for active SA bands, added legacy_sa for non 551/550 devices
 };
 
 const BandLocking = () => {
@@ -132,19 +134,15 @@ const BandLocking = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        // Fetch active profile status
-        const profileResponse = await fetch(
-          "/cgi-bin/quecmanager/profiles/check_status.sh"
-        );
+        const platform = sessionStorage.getItem("platform");
+        let url = "/cgi-bin/quecmanager/profiles/check_status.sh";
+        const profileResponse = await fetch(url);
         if (!profileResponse.ok) {
           throw new Error(
             `Failed to fetch profile status: ${profileResponse.statusText}`
           );
         }
         const profileData: ProfileStatus = await profileResponse.json();
-
-        console.log("Profile Status:", profileData);
-
         // Only proceed if there's an active profile
         if (
           profileData.status === "success" &&
@@ -152,6 +150,7 @@ const BandLocking = () => {
           profileData.profile !== "unknown" &&
           profileData.profile !== "none"
         ) {
+          console.log("HERE");
           // Fetch all profiles to find the active one
           const profilesResponse = await fetch(
             "/cgi-bin/quecmanager/profiles/list_profiles.sh"
@@ -201,21 +200,24 @@ const BandLocking = () => {
 
   const fetchBandsData = async () => {
     try {
-      const response = await fetch(
-        "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=7"
-      );
+      const platform = sessionStorage.getItem("platform");
+      let url = "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=7";
+      let atcmd = "";
+      if (platform?.includes("LEMUR")) {
+        atcmd = 'AT+QNWPREFCFG="policy_band";+QNWPREFCFG="lte_band";+QNWPREFCFG="nsa_nr5g_band";+QNWPREFCFG="nr5g_band"';
+        url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" + new URLSearchParams({atcmd: atcmd});
+      }
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      const data: ATResponse[] = await response.json();
-
+      const data: ATResponse[] =  platform?.includes("LEMUR") ? convertFetchDataResponse(atcmd, await response.text()) : await response.json();
       // Parse supported bands from first response
       const supportedBandsResponse = data[0].response;
       const newBands: BandState = {
         lte: parseResponse(supportedBandsResponse, "lte", true),
         nsa: parseResponse(supportedBandsResponse, "nsa", true),
-        sa: parseResponse(supportedBandsResponse, "sa", true), // Will use nrdc_nr5g_band
+        sa: parseResponse(supportedBandsResponse, platform?.includes("LEMUR") ? "legacy_sa": "sa", true), // Will use nrdc_nr5g_band for RM550/551
       };
       setBands(newBands);
 
@@ -224,7 +226,7 @@ const BandLocking = () => {
       const newCheckedBands: BandState = {
         lte: parseResponse(checkedBandsResponse, "lte", false),
         nsa: parseResponse(checkedBandsResponse, "nsa", false),
-        sa: parseResponse(checkedBandsResponse, "sa", false), // Will use nr5g_band
+        sa: parseResponse(checkedBandsResponse, platform?.includes("LEMUR") ? "legacy_sa": "sa", false), // Will use nr5g_band
       };
       setCheckedBands(newCheckedBands);
 
@@ -311,7 +313,6 @@ const BandLocking = () => {
       });
       return;
     }
-    
 
     try {
       // Set isSaving to true to indicate that a save operation is in progress
@@ -609,5 +610,79 @@ const BandLocking = () => {
     </div>
   );
 };
+// Convert the response from get_atcommand.sh to the expected structure as provided from fetch_data.sh?set=1
 
+const convertFetchDataResponse = (
+  commands: string,
+  response: string
+): { command: string; response: string; status: string }[] => {
+  // Define the command groups you want to extract
+const commandGroups = [
+    {
+      command: 'AT+QNWPREFCFG="policy_band"',
+      keys: [
+        '+QNWPREFCFG: "gw_band"',
+        '+QNWPREFCFG: "lte_band"',
+        '+QNWPREFCFG: "nsa_nr5g_band"',
+        '+QNWPREFCFG: "nr5g_band"',
+      ],
+      onlyFirst: true, // Only take the first matching line for each key
+    },
+    {
+      command: 'AT+QNWPREFCFG="lte_band";+QNWPREFCFG="nsa_nr5g_band";+QNWPREFCFG="nr5g_band"',
+      keys: [
+        '+QNWPREFCFG: "lte_band"',
+        '+QNWPREFCFG: "nsa_nr5g_band"',
+        '+QNWPREFCFG: "nr5g_band"',
+      ],
+      onlyFirst: false, // Take all matching lines for each key
+      skipFirst: true, // Skip the first line if it is empty
+    },
+  ];
+
+const responseLines = response
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const results: { command: string; response: string; status: string }[] = [];
+
+  // Track which lines were used as "first" for each key in the first group
+  const usedFirstLines: Record<string, string> = {};
+
+  for (const group of commandGroups) {
+    const matchingLines: string[] = [];
+    for (const key of group.keys) {
+      // Find all lines that start with this key
+      const lines = responseLines.filter((line) => line.startsWith(key));
+      if (lines.length > 0) {
+        if (group.onlyFirst) {
+          matchingLines.push(lines[0]);
+          usedFirstLines[key] = lines[0];
+        } else {
+          // For the second group, skip the first line if skipFirst is true
+          const linesToInclude =
+            group.skipFirst && usedFirstLines[key]
+              ? lines.slice(1)
+              : lines;
+          if (linesToInclude.length > 0) {
+            matchingLines.push(...linesToInclude, "");
+          }
+        }
+      }
+    }
+    if (matchingLines.length > 0) {
+      // Remove trailing blank line if present
+      if (matchingLines[matchingLines.length - 1] === "") matchingLines.pop();
+      results.push({
+        command: group.command,
+        response: `${group.command}\n${matchingLines.join("\n")}\n`,
+        status: response.includes("OK") ? "success" : "error",
+      });
+    }
+  }
+  console.log('results', results);
+  return results;
+};
 export default BandLocking;

@@ -63,10 +63,19 @@ const useCellSettingsData = () => {
       // Clean up data from previous fetch
       setData(null);
 
-      const response = await fetch(
-        "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=2"
-      );
-      const rawData = await response.json();
+
+      const platform = sessionStorage.getItem("platform");
+      let url = "/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=2";
+      let atcmd = "";
+      console.log('platform', platform);
+      if (platform?.includes("LEMUR")) {
+        // local COMMANDS="AT+CGDCONT?;+CGCONTRDP;+QNWPREFCFG=\"mode_pref\";+QNWPREFCFG=\"nr5g_disable_mode\";+QUIMSLOT?;+CFUN?;+QMBNCFG=\"AutoSel\";+QMBNCFG=\"list\";+QMAP=\"WWAN\";+QNWCFG=\"lte_ambr\";+QNWCFG=\"nr5g_ambr\""
+        atcmd = 'AT+CGDCONT?;+CGCONTRDP;+QNWPREFCFG="mode_pref";+QNWPREFCFG="nr5g_disable_mode";+QUIMSLOT?;+CFUN?;+QMBNCFG="AutoSel";+QMBNCFG="list";+QMAP="WWAN";+QNWCFG="lte_ambr";+QNWCFG="nr5g_ambr"';
+        url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" + new URLSearchParams({atcmd: atcmd});
+      }
+      const response = await fetch(url);
+      const rawData = platform?.includes("LEMUR") ? convertResponse(atcmd, await response.text()) : await response.json();
+
       console.log("Fetched cell settings data:", rawData);
 
       const processedData: CellSettingsData = {
@@ -385,4 +394,61 @@ const getNR5GAMBRValue = (data: string): string[] => {
     console.error("Error processing NR5G AMBR values:", error);
     return [];
   }
+};
+// Convert the response from get_atcommand.sh to the expected structure as provided from fetch_data.sh?set=1
+const convertResponse = (
+  commands: string,
+  response: string
+): { command: string; response: string; status: string }[] => {
+  // Split commands and responses into arrays
+  const commandList = commands
+    .split(";")
+    .map((cmd) => cmd.trim())
+    .filter(Boolean);
+
+  const responseLines = response
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  // For each command, collect its matching response lines
+  const results: { command: string; response: string; status: string }[] = [];
+
+  for (const cmd of commandList) {
+    // Build a regex to match the response lines for this command
+    // For example, AT+QNWPREFCFG="mode_pref" -> /^\+QNWPREFCFG: "mode_pref"/
+    let keyRegex: RegExp;
+    if (/^AT\+QNWPREFCFG=/.test(cmd)) {
+      const param = cmd.match(/^AT\+QNWPREFCFG=(.*)$/)?.[1];
+      keyRegex = new RegExp(`^\\+QNWPREFCFG: ${param?.replace(/"/g, '\\"')}`);
+    } else if (/^AT\+CGDCONT\?/.test(cmd)) {
+      keyRegex = /^\+CGDCONT:/;
+    } else if (/^AT\+ICCID/.test(cmd)) {
+      keyRegex = /^\+ICCID:/;
+    } else if (/^AT\+CGSN/.test(cmd)) {
+      keyRegex = /^\d{15,}$/; // IMEI is usually a 15-digit number
+    } else {
+      // Generic: match +COMMAND:
+      const key = cmd.replace(/^AT\+/, "+").replace(/\?.*$/, "?").replace(/=.*/, "");
+      keyRegex = new RegExp(`^\\${key}`);
+    }
+
+    // Find all response lines that match this command
+    const matchingLines = responseLines.filter((line) => keyRegex.test(line));
+
+    // If no matching lines, skip this command
+    if (matchingLines.length === 0) continue;
+
+    // Compose the response: AT+CMD\n+RESPONSE1\n+RESPONSE2...
+    const resp = `${cmd}\n${matchingLines.join("\n")}\n`;
+
+    results.push({
+      command: cmd,
+      response: resp,
+      status: response.includes("OK") ? "success" : "error",
+    });
+  }
+
+  return results;
 };
