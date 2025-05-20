@@ -19,6 +19,7 @@ import GithubButtonToast from "@/components/github-button";
 const MTUSettingsPage = () => {
   const [mtuValue, setMtuValue] = useState("1500");
   const [mtuState, setMtuState] = useState(false);
+  const [mtuCapable, setMtuCapable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const toast = useToast();
@@ -34,7 +35,17 @@ const MTUSettingsPage = () => {
         setMtuState(data.isEnabled);
         setMtuValue(data.currentValue.toString());
         setLoading(false);
-
+        if(!data.capability) {
+          setMtuCapable(false);
+          toast.toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: "MTU settings are not supported on this device.",
+            action: <GithubButtonToast />,
+          });
+        } else {
+          setMtuCapable(true);
+        }
       } catch (err) {
         setError("Failed to fetch MTU settings");
         setLoading(false);
@@ -111,46 +122,53 @@ const MTUSettingsPage = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-6">
-            <div>
-              <label className="text-sm font-medium">MTU Value</label>
-              <Input
-                type="number"
-                value={mtuValue}
-                onChange={(e) => setMtuValue(e.target.value)}
-                disabled={!mtuState}
-                className="mt-1"
-                min="68"  // Minimum valid MTU
-                max="9000"  // Maximum typical MTU
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Set the MTU value for your connection (default: 1500).
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border p-4">
+        {(mtuCapable && !loading) ? (
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-6">
               <div>
-                <label className="text-base font-medium">MTU State</label>
-                <p className="text-sm text-gray-500">
-                  Toggle to enable or disable custom MTU value.
+                <label className="text-sm font-medium">MTU Value</label>
+                <Input
+                  type="number"
+                  value={mtuValue}
+                  onChange={(e) => setMtuValue(e.target.value)}
+                  disabled={!mtuState}
+                  className="mt-1"
+                  min="68"  // Minimum valid MTU
+                  max="9000"  // Maximum typical MTU
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Set the MTU value for your connection (default: 1500).
                 </p>
               </div>
-              <Switch 
-                checked={mtuState} 
-                onCheckedChange={(checked) => {
-                  setMtuState(checked);
-                  // Reset to default when disabled
-                  if (!checked) setMtuValue("1500");
-                }} 
-              />
-            </div>
-          </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            Save Configuration
-          </Button>
-        </form>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <label className="text-base font-medium">MTU State</label>
+                  <p className="text-sm text-gray-500">
+                    Toggle to enable or disable custom MTU value.
+                  </p>
+                </div>
+                <Switch 
+                  checked={mtuState} 
+                  onCheckedChange={(checked) => {
+                    setMtuState(checked);
+                    // Reset to default when disabled
+                    if (!checked) setMtuValue("1500");
+                  }} 
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              Save Configuration
+            </Button>
+          </form> ): (
+          <div className="text-center">
+            <p className="text-sm text-gray-500">
+              MTU settings are not supported on this device.
+            </p>
+            </div>
+            )}
       </CardContent>
     </Card>
   );
