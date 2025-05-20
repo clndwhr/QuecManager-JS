@@ -29,7 +29,7 @@ const MTUSettingsPage = () => {
       try {
         const response = await fetch("/cgi-bin/quecmanager/advance/mtu.sh");
         const data = await response.json();
-        
+
         // Update state based on response
         setMtuState(data.isEnabled);
         setMtuValue(data.currentValue.toString());
