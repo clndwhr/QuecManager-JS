@@ -159,6 +159,8 @@ const CellScannerPage = () => {
     message: "",
   });
   const [pollingCount, setPollingCount] = useState(0); // Track number of polls to prevent infinite loops
+  const capStr = sessionStorage.getItem("capabilities");
+  const capabilities = capStr && capStr !== "null" && capStr !== "undefined" ? JSON.parse(capStr) : null;
 
   // Cooldown check effect
   useEffect(() => {
@@ -599,8 +601,20 @@ const CellScannerPage = () => {
 
   // Initial check on component mount
   useEffect(() => {
-    checkInitialResults();
-    fetchQuecwatchStatus();
+    if (capabilities && capabilities != "undefined") {
+      if (!capabilities.keepAlive) {
+        toast({
+          title: "Unsupported Device",
+          description: "KeepAlive is not supported on this device.",
+          variant: "destructive",
+        });
+        // Optionally, you can return here to prevent further execution
+        return;
+      } else {
+        checkInitialResults();
+        fetchQuecwatchStatus();
+      }
+    }
   }, [checkInitialResults, fetchQuecwatchStatus]);
 
   // Clear results
@@ -742,6 +756,8 @@ const CellScannerPage = () => {
             )}
           </CardDescription>
         </CardHeader>
+        { capabilities && capabilities.cellscan ? (
+          <div>
         <CardContent>
           <ScrollArea className="h-96">
             {!scanResult && scanState.status === "idle" && (
@@ -933,6 +949,12 @@ const CellScannerPage = () => {
             )}
           </div>
         </CardFooter>
+        </div>
+        ) : (
+          <CardContent>
+            Full Network Cell Scan is not supported on this device.
+          </CardContent>
+        )}
       </Card>
       <Card>
         <CardHeader>
@@ -948,6 +970,9 @@ const CellScannerPage = () => {
             )}
           </CardDescription>
         </CardHeader>
+        { capabilities && capabilities.cellscan ? (
+          <div>
+
         <CardContent>
           <NeighborCellsDisplay neighborCells={neighborCells} />
         </CardContent>
@@ -984,12 +1009,20 @@ const CellScannerPage = () => {
             )}
           </div>
         </CardFooter>
+          </div>
+        ) : (
+          <CardContent>
+            Neighbor Cell Scan is not supported on this device.
+          </CardContent>
+        )}
       </Card>
+      {(capabilities && capabilities.cellscan ) ? (
       <FrequencyInfoCard
         scanResult={scanResult}
         isLoading={scanState.status === "scanning"}
         mccMncList={mccMncList}
       />
+      ) : ""}
     </div>
   );
 };
