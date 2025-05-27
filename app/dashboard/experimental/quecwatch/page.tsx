@@ -94,6 +94,8 @@ const QuecWatchPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastActivity, setLastActivity] = useState<string | null>(null);
   const [currentRetries, setCurrentRetries] = useState(0);
+  const capStr = sessionStorage.getItem("capabilities");
+  const capabilities = capStr && capStr !== "null" && capStr !== "undefined" ? JSON.parse(capStr) : null;
 
   // Fetch QuecWatch configuration
   const fetchQuecWatchConfig = async () => {
@@ -157,7 +159,18 @@ const QuecWatchPage = () => {
 
   // Initial configuration fetch
   useEffect(() => {
-    fetchQuecWatchConfig();
+    if (capabilities && capabilities != "undefined") {
+      if (!capabilities.quecWatch) {
+        toast({
+          title: "Unsupported Device",
+          description: "QuecWatch is not supported on this device.",
+          variant: "destructive",
+        });
+        return;
+      } else {
+        fetchQuecWatchConfig();
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -320,7 +333,8 @@ const QuecWatchPage = () => {
   };
 
   return (
-    <Card>
+    <Card> {(capabilities?.quecWatch) ? (
+      <div>
       <CardHeader>
         <CardTitle>QuecWatch</CardTitle>
         <CardDescription>
@@ -618,6 +632,27 @@ const QuecWatchPage = () => {
           </Button>
         )}
       </CardFooter>
+      </div>
+    ) : (
+      <div>
+        <CardHeader>
+          <CardTitle>QuecWatch</CardTitle>
+          <CardDescription>
+            An intelligent watchdog service for Quectel-AP modems that ensures
+            network reliability through automated monitoring, connection
+            management, and SIM failover capabilities.
+          </CardDescription>
+        </CardHeader>
+
+      <CardContent>
+        <div className="text-center">
+          <p className="text-muted-foreground text-sm">
+            QuecWatch is not supported on this device.
+          </p>
+        </div>
+      </CardContent>
+      </div>
+    )}
     </Card>
   );
 };

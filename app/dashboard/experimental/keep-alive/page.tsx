@@ -34,9 +34,22 @@ const KeepAliveCard = () => {
   const [interval, setInterval] = useState<string>("");
   const [enabled, setEnabled] = useState<boolean>(false);
   const { toast } = useToast();
+  const capStr = sessionStorage.getItem("capabilities");
+  const capabilities = capStr && capStr !== "null" && capStr !== "undefined" ? JSON.parse(capStr) : null;
 
   useEffect(() => {
-    fetchStatus();
+    if (capabilities && capabilities != "undefined") {
+      if (!capabilities.keepAlive) {
+        toast({
+          title: "Unsupported Device",
+          description: "KeepAlive is not supported on this device.",
+          variant: "destructive",
+        });
+        return;
+      } else {
+        fetchStatus();
+      }
+    }
   }, []);
 
   const fetchStatus = async (): Promise<void> => {
@@ -151,6 +164,8 @@ const KeepAliveCard = () => {
 
   return (
     <Card>
+      { capabilities && capabilities.keepAlive ? (
+      <div>
       <CardHeader>
         <CardTitle>Keep Alive</CardTitle>
         <CardDescription>
@@ -216,6 +231,22 @@ const KeepAliveCard = () => {
           Keep Alive is Under Consideration
         </Toggle>
       </CardFooter>
+      </div>
+      ) : (
+        <div>
+      <CardHeader>
+        <CardTitle>Keep Alive</CardTitle>
+        <CardDescription>
+          Ensure uninterrupted connectivity by preventing modem idle times with
+          scheduled speed tests to keep your connection alive.
+        </CardDescription>
+      </CardHeader>
+            <CardContent>
+
+            Keep Alive is not supported on this device.
+      </CardContent>
+        </div>
+      )}
     </Card>
   );
 };

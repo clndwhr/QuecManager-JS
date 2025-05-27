@@ -129,8 +129,21 @@ const QuecProfilesPage = () => {
   // Error message state
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+
+  const capStr = sessionStorage.getItem("capabilities");
+  const capabilities = capStr && capStr !== "null" && capStr !== "undefined" ? JSON.parse(capStr) : null;
+
   // Fetch profiles on component mount
   useEffect(() => {
+    if (capabilities && capabilities != "undefined") {
+      if (!capabilities.quecProfiles) {
+        toast({
+          title: "Unsupported Device",
+          description: "QuecPropfiles is not supported on this device.",
+          variant: "destructive",
+        });
+        return;
+      } else {
     fetchProfiles();
     checkProfileStatus();
     fetchDeviceInfo(); // Prefetch device info when component mounts
@@ -138,7 +151,10 @@ const QuecProfilesPage = () => {
     // Set up status check interval
     const statusInterval = setInterval(checkProfileStatus, 5000);
     return () => clearInterval(statusInterval);
+      }
+    }
   }, []);
+
 
   // Function to fetch current device ICCID and IMEI
   const fetchDeviceInfo = async () => {
@@ -874,6 +890,8 @@ const QuecProfilesPage = () => {
   return (
     <div>
       <Card>
+        {(capabilities?.quecWatch) ? (
+          <div>
         <CardHeader>
           <CardTitle>QuecProfiles</CardTitle>
           <CardDescription>
@@ -1524,6 +1542,21 @@ const QuecProfilesPage = () => {
           {/* Status Banner */}
           {renderStatusBanner()}
         </CardContent>
+        </div>
+        ) : (
+          <div>
+        <CardHeader>
+          <CardTitle>QuecProfiles</CardTitle>
+          <CardDescription>
+            Configure personalized profiles for your SIM cards to manage
+            connectivity settings and network preferences.
+          </CardDescription>
+        </CardHeader>            
+        <CardContent className="grid gap-y-8">
+              QuecProfiles is currently not available on this device.
+        </CardContent>
+        </div>
+        )}
       </Card>
     </div>
   );

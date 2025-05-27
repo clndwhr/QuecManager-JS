@@ -79,13 +79,24 @@ export function useAuth() {
         },
       });
 
+      const capesResponse = await fetch("/cgi-bin/quecmanager/get-capabilities.sh", {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       if (!response.ok) {
         handleServerDown();
         return;
       }
-
       const result = await response.json();
+      const capesResult = await capesResponse.json();
+      if (typeof capesResult == 'string') { sessionStorage.setItem("capabilites", capesResult); }
+      else if (typeof capesResult == 'object') {
+        sessionStorage.setItem("capabilites", JSON.stringify(capesResult));
+      }
       sessionStorage.setItem("platform", result?.platform);
+
       if (!result.alive) {
         handleServerDown();
       } else {
