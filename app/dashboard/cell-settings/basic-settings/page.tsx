@@ -77,6 +77,7 @@ interface Profile {
 import { atCommandSender } from "@/utils/at-command";
 import { Separator } from "@/components/ui/separator";
 import AMBRCard from "@/components/cell-settings/amb-card";
+const platform = sessionStorage.getItem("platform");
 
 const BasicSettings = () => {
   const { toast } = useToast();
@@ -157,7 +158,6 @@ const BasicSettings = () => {
 
 
         try {
-          const platform = sessionStorage.getItem("platform");
           let url = "/cgi-bin/quecmanager/profiles/check_status.sh";
           const profileResponse = await fetch(url);
           if (!profileResponse.ok) {
@@ -218,7 +218,7 @@ const BasicSettings = () => {
               nr5gMode: false,
             });
           }
-      
+
         } catch (err) {
           console.error("Error fetching profile data:", err);
         }
@@ -362,7 +362,15 @@ const BasicSettings = () => {
   const executeATCommand = async (command: string): Promise<boolean> => {
     try {
       console.log("Executing AT command:", command);
-      const response = await atCommandSender(command);
+      let response: any;
+      if (platform && platform !== undefined && platform !== "pinn") {
+        // For non-PINN platforms, we use the get_atcommand.sh call
+        const url = "/cgi-bin/quecmanager/at_cmd/get_atcommand.sh?" +  new URLSearchParams({atcmd: command});;
+        response = await fetch(url);
+      } else {
+        // For PINN, we use the atCommandSender directly
+        response = await atCommandSender(command);
+      }
 
       if (response.status === "error") {
         throw new Error(response.status || "Command execution failed");
