@@ -1,11 +1,13 @@
 #!/bin/sh
 
-if [ -f "/tmp/capabilities.tmp" ]; then
-    if find "/tmp/capabilities.tmp" -mmin +1440 | grep -q .; then
-        rm -f /tmp/capabilities.tmp
+CAPES_FILE=/tmp/capbilities.tmp
+
+if [ -f "$CAPES_FILE" ]; then
+    if find "$CAPES_FILE" -mmin +1440 | grep -q .; then
+        rm -f $CAPES_FILE
     fi
-    if [ -f "/tmp/capabilities.tmp" ]; then
-        cat /tmp/capabilities.tmp
+    if [ -f "$CAPES_FILE" ]; then
+        cat $CAPES_FILE
         exit 0;
     fi
 fi
@@ -26,9 +28,9 @@ case $PLATFORM in
         EXPERIMENTAL_QUECPROFILES=false
         EXPERIMENTAL_KEEPALIVE=false
         EXPERIMENTAL_CELLSCAN=false
-        FIRMWARE_VERSION=$(atcmd 'AT+QGMR' | sed -n '2p' | tr -d '\r'| sed 's/\x1B\[[0-9;:]*[mGKHF]//g')
-        MODEM_TYPE=$(atcmd 'AT+CGMM' | sed -n '2p' | tr -d '\r'| sed 's/\x1B\[[0-9;:]*[mGKHF]//g')
-        MODEM_MANUFACTURER=$(atcmd 'AT+CGMI' | sed -n '2p' | tr -d '\r'| sed 's/\x1B\[[0-9;:]*[mGKHF]//g')
+        FIRMWARE_VERSION=$(atcmd 'AT+QGMR' | sed -n '2p' | tr -d '\r' | cut -n8- | rev | cut -n5- | rev)
+        MODEM_TYPE=$(atcmd 'AT+CGMM' | sed -n '2p' | tr -d '\r' | cut -n8- | rev | cut -n5- | rev)
+        MODEM_MANUFACTURER=$(atcmd 'AT+CGMI' | sed -n '2p' | tr -d '\r' | cut -n8- | rev | cut -n5- | rev)
         ;;
     *)
         FIRMWARE_VERSION=$(sms_tool at -t 3 'AT+QGMR' | sed -n '2p' | tr -d '\r')
@@ -54,6 +56,7 @@ RESPONSE="${RESPONSE}  \"modem\": \"${MODEM_TYPE}\",\n"
 RESPONSE="${RESPONSE}  \"manufacturer\": \"${MODEM_MANUFACTURER}\"\n"
 RESPONSE="${RESPONSE}}\n"
 
+echo -e "${RESPONSE}" > $CAPES_FILE
 echo -e "${RESPONSE}"
 
 exit 0;
