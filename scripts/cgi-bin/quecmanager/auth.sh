@@ -9,7 +9,8 @@ read -r POST_DATA
 
 # Debug log for generated hash
 DEBUG_LOG="/tmp/auth.log"
-touch "/tmp/auth.log"
+touch $DEBUG_LOG
+# Clear log before each attempt to keep file space usage small
 echo "" > "$DEBUG_LOG"
 
 # get the platform type
