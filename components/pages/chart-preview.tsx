@@ -65,8 +65,12 @@ export default function ChartPreviewSignal() {
   });
   const [initialLoading, setInitialLoading] = useState(true);
   const previousData = useRef<SignalData | null>(null);
-
+  const { logout } = useAuth();
+  const { isServerAlive } = heartbeat();
   useEffect(() => {
+    if (!isServerAlive) {
+      logout();
+    }
     const fetchStats = async () => {
       try {
         const response = await fetch("/cgi-bin/quecmanager/at_cmd/fetch_data.sh?set=5");
@@ -134,7 +138,7 @@ export default function ChartPreviewSignal() {
     fetchStats();
     const intervalId = setInterval(fetchStats, 2000);
     return () => clearInterval(intervalId);
-  }, [initialLoading]);
+  }, [initialLoading, isServerAlive, logout]);
 
   const chartData: ChartDataItem[] = [
     {

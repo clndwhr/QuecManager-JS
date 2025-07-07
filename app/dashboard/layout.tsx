@@ -3,10 +3,11 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/auth";
 import { ProtectedRoute } from "@/components/hoc/protected-route";
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RadioTower, User2Icon, Menu, Power } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import heartbeat from "@/hooks/heartbeat";
 
 import {
   atCommandSender,
@@ -56,10 +57,18 @@ interface IpResponse {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const currentPathName = usePathname();
   const { logout } = useAuth();
+
   const { setTheme } = useTheme();
   const [isRebooting, setIsRebooting] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const toast = useToast();
+
+  const { isServerAlive } = heartbeat();
+  useEffect(() => {
+    if (!isServerAlive) {
+      logout();
+    }
+  }, [isServerAlive, logout]);
 
   // Handler for rebooting the device
   const handleReboot = async () => {
@@ -356,7 +365,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <DropdownMenuItem asChild>
                 {/* a tag that redirects to a new tab */}
                 <a
-                  href="https://github.com/iamromulan/quectel-rgmii-toolkit/discussions/new/choose"
+                  href="https://github.com/iamromulan/cellular-modem-wiki/discussions/new/choose"
                   target="_blank"
                 >
                   Support
