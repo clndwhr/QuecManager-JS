@@ -52,32 +52,32 @@ interface SessionData {
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isServerAlive, setIsServerAlive] = useState<boolean>(true);
+  // const [isServerAlive, setIsServerAlive] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
     checkAuth();
 
-    // Start heartbeat check
-    const heartbeatInterval = setInterval(
-      checkServerStatus,
-      HEARTBEAT_INTERVAL
-    );
+    // // Start heartbeat check
+    // const heartbeatInterval = setInterval(
+    //   checkServerStatus,
+    //   HEARTBEAT_INTERVAL
+    // );
 
-    return () => {
-      clearInterval(heartbeatInterval);
-    };
+    // return () => {
+    //   clearInterval(heartbeatInterval);
+    // };
   }, []);
 
   // New function to check server status
-  async function checkServerStatus() {
-    try {
-      const response = await fetch("/cgi-bin/quecmanager/heartbeat.sh", {
-        method: "GET",
-        headers: {
-          "Cache-Control": "no-cache",
-        },
-      });
+  // async function checkServerStatus() {
+  //   try {
+  //     const response = await fetch("/cgi-bin/quecmanager/heartbeat.sh", {
+  //       method: "GET",
+  //       headers: {
+  //         "Cache-Control": "no-cache",
+  //       },
+  //     });
 
       const capesResponse = await fetch("/cgi-bin/quecmanager/get-capabilities.sh", {
         method: "GET",
@@ -107,10 +107,10 @@ export function useAuth() {
     }
   }
 
-  function handleServerDown() {
-    setIsServerAlive(false);
-    logout();
-  }
+  // function handleServerDown() {
+  //   setIsServerAlive(false);
+  //   logout();
+  // }
 
   // Your existing functions
   function generateAuthToken(length = 32) {
@@ -202,5 +202,6 @@ export function useAuth() {
     }
   }
 
-  return { isAuthenticated, isServerAlive, login, logout, checkAuth };
+  // return { isAuthenticated, isServerAlive, login, logout, checkAuth };
+  return { isAuthenticated, login, logout, checkAuth };
 }
