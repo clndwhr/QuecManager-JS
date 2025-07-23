@@ -71,6 +71,7 @@ const heartbeat = () => {
         handleServerDown();
       } else {
         setIsServerAlive(true);
+        sessionStorage.setItem("platform", result.platform || "unknown");
       }
     } catch (error) {
       handleServerDown();

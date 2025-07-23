@@ -31,6 +31,8 @@ import { useState, useEffect, useCallback } from "react";
 import { HomeData } from "@/types/types";
 import { BANDWIDTH_MAP, NR_BANDWIDTH_MAP } from "@/constants/home/index";
 
+const platform = sessionStorage.getItem("platform") || "unknown";
+
 const useHomeData = () => {
   const [data, setData] = useState<HomeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
