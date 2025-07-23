@@ -367,7 +367,8 @@ const getNetworkType = (response: string) => {
 };
 
 const getModemTemperature = (response: string) => {
-  const temps = ["cpuss-0", "cpuss-1", "cpuss-2", "cpuss-3"].map((cpu) => {
+  const tempsMap = platform.includes("LEMUR") ? ["cpuss-0-usr"] : ["cpuss-0", "cpuss-1", "cpuss-2", "cpuss-3"];
+  const temps = tempsMap.map((cpu) => {
     const line = response.split("\n").find((l) => l.includes(cpu));
     return parseInt(line!?.split(":")[1]?.split(",")[1].replace(/"/g, "").trim());
   });
